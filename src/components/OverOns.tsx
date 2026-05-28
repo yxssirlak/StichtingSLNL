@@ -12,8 +12,8 @@ export default function OverOns() {
     <section id="over-ons" className="py-20 lg:py-28 bg-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section label */}
-        <div className="text-center mb-12">
-          <span className="inline-block px-4 py-1.5 bg-forest-50 text-forest-700 text-xs font-bold uppercase tracking-widest rounded-full border border-forest-100">
+        <div className="text-center mb-16">
+          <span className="inline-block px-5 py-2 bg-gradient-to-r from-somali-red/10 to-forest-800/10 text-forest-800 text-xs font-black uppercase tracking-widest rounded-full border-2 border-somali-red/30">
             Over Ons
           </span>
         </div>
@@ -36,13 +36,13 @@ export default function OverOns() {
               />
             </div>
             {/* Decorative element */}
-            <div className="absolute -bottom-6 -left-6 w-32 h-32 bg-forest-50 rounded-2xl -z-10" />
-            <div className="absolute -top-6 -right-6 w-24 h-24 bg-forest-100 rounded-2xl -z-10" />
+            <div className="absolute -bottom-6 -left-6 w-32 h-32 bg-somali-red/5 rounded-2xl -z-10" />
+            <div className="absolute -top-6 -right-6 w-24 h-24 bg-forest-800/10 rounded-2xl -z-10" />
 
             {/* Badge */}
-            <div className="absolute bottom-4 left-1/2 -translate-x-1/2 bg-forest-800 text-white rounded-xl px-5 py-3 shadow-xl text-center whitespace-nowrap">
+            <div className="absolute bottom-4 left-1/2 -translate-x-1/2 bg-gradient-to-r from-somali-red to-forest-800 text-white rounded-xl px-6 py-3 shadow-xl text-center whitespace-nowrap border-2 border-white">
               <div className="text-lg font-black">Opgericht 2012</div>
-              <div className="text-xs opacity-80">Verbindende factor in NL</div>
+              <div className="text-xs font-semibold opacity-90">Verbindende factor NL</div>
             </div>
           </div>
 
@@ -50,7 +50,7 @@ export default function OverOns() {
           <div>
             <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black text-gray-900 leading-tight mb-6">
               De verbindende factor voor{' '}
-              <span className="text-forest-800">Somaliland</span> in Nederland
+              <span className="bg-gradient-to-r from-somali-red via-forest-800 to-somali-red bg-clip-text text-transparent">Somaliland</span> in Nederland
             </h2>
             <p className="text-gray-600 leading-relaxed mb-6 text-base lg:text-lg">
               Sinds 2012 is Stichting SLNL de verbindende factor voor de Somalilandse gemeenschap
@@ -74,7 +74,7 @@ export default function OverOns() {
 
             <button
               onClick={() => document.querySelector('#gemeenschap')?.scrollIntoView({ behavior: 'smooth' })}
-              className="group inline-flex items-center gap-2 px-6 py-3.5 bg-forest-800 text-white font-semibold rounded-xl hover:bg-forest-700 active:scale-95 transition-all duration-200 shadow-lg shadow-forest-800/20"
+              className="group inline-flex items-center gap-2 px-6 py-3.5 bg-gradient-to-r from-somali-red to-forest-800 text-white font-bold rounded-xl hover:shadow-lg hover:shadow-somali-red/30 active:scale-95 transition-all duration-200"
             >
               Lees Verder
               <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />

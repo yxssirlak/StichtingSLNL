@@ -16,7 +16,7 @@ export default function Contact() {
         <div className="grid lg:grid-cols-2 gap-12 lg:gap-20">
           {/* Left: info */}
           <div>
-            <span className="inline-block px-4 py-1.5 bg-forest-50 text-forest-700 text-xs font-bold uppercase tracking-widest rounded-full border border-forest-100 mb-4">
+            <span className="inline-block px-5 py-2 bg-gradient-to-r from-somali-red/10 to-forest-800/10 text-forest-800 text-xs font-black uppercase tracking-widest rounded-full border-2 border-somali-red/30 mb-6">
               Contact
             </span>
             <h2 className="text-3xl sm:text-4xl font-black text-gray-900 mb-6">
@@ -29,8 +29,8 @@ export default function Contact() {
 
             <div className="space-y-5">
               <div className="flex items-start gap-4">
-                <div className="w-10 h-10 bg-forest-50 rounded-xl flex items-center justify-center flex-shrink-0">
-                  <Phone size={18} className="text-forest-700" />
+                <div className="w-10 h-10 bg-gradient-to-br from-somali-red to-forest-800 rounded-xl flex items-center justify-center flex-shrink-0">
+                  <Phone size={18} className="text-white" />
                 </div>
                 <div>
                   <div className="font-semibold text-gray-800 text-sm">Telefoon</div>
@@ -41,8 +41,8 @@ export default function Contact() {
               </div>
 
               <div className="flex items-start gap-4">
-                <div className="w-10 h-10 bg-forest-50 rounded-xl flex items-center justify-center flex-shrink-0">
-                  <Mail size={18} className="text-forest-700" />
+                <div className="w-10 h-10 bg-gradient-to-br from-forest-800 to-somali-red rounded-xl flex items-center justify-center flex-shrink-0">
+                  <Mail size={18} className="text-white" />
                 </div>
                 <div>
                   <div className="font-semibold text-gray-800 text-sm">E-mail</div>
@@ -53,8 +53,8 @@ export default function Contact() {
               </div>
 
               <div className="flex items-start gap-4">
-                <div className="w-10 h-10 bg-forest-50 rounded-xl flex items-center justify-center flex-shrink-0">
-                  <MapPin size={18} className="text-forest-700" />
+                <div className="w-10 h-10 bg-gradient-to-br from-somali-red via-forest-800 to-somali-red rounded-xl flex items-center justify-center flex-shrink-0">
+                  <MapPin size={18} className="text-white" />
                 </div>
                 <div>
                   <div className="font-semibold text-gray-800 text-sm">Locatie</div>
@@ -65,7 +65,7 @@ export default function Contact() {
           </div>
 
           {/* Right: form */}
-          <div className="bg-gray-50 rounded-2xl p-6 lg:p-8 border border-gray-100">
+          <div className="bg-gray-50 rounded-2xl p-6 lg:p-8 border-2 border-somali-red/30">
             {sent ? (
               <div className="h-full flex flex-col items-center justify-center text-center py-8">
                 <img src="/SLNL_logo.png" alt="SLNL" className="w-16 h-16 mx-auto mb-4" />
@@ -112,7 +112,7 @@ export default function Contact() {
                 </div>
                 <button
                   type="submit"
-                  className="group w-full inline-flex items-center justify-center gap-2 py-3 bg-forest-800 text-white font-semibold rounded-xl hover:bg-forest-700 active:scale-95 transition-all duration-200"
+                  className="group w-full inline-flex items-center justify-center gap-2 py-3 bg-gradient-to-r from-somali-red to-forest-800 text-white font-bold rounded-xl hover:shadow-lg hover:shadow-somali-red/30 active:scale-95 transition-all duration-200"
                 >
                   Verstuur Bericht
                   <Send size={16} className="group-hover:translate-x-0.5 transition-transform" />

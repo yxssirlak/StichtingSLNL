@@ -145,11 +145,11 @@ export default function Evenementen() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <div className="text-center max-w-2xl mx-auto mb-16">
-          <span className="inline-block px-4 py-1.5 bg-white text-forest-700 text-xs font-bold uppercase tracking-widest rounded-full border border-forest-100 mb-4">
+          <span className="inline-block px-5 py-2 bg-gradient-to-r from-forest-800/10 to-somali-red/10 text-forest-800 text-xs font-black uppercase tracking-widest rounded-full border-2 border-somali-red/30 mb-6">
             Evenementen & Inschrijvingen
           </span>
           <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black text-gray-900 leading-tight mb-4">
-            Aankomende evenementen
+            <span className="text-somali-red">Aankomende</span> evenementen
           </h2>
           <p className="text-gray-500 text-base">
             Schrijf je in voor onze evenementen en maak deel uit van de gemeenschap.
@@ -158,10 +158,12 @@ export default function Evenementen() {
 
         {/* Events grid */}
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {events.map((event) => (
+          {events.map((event, idx) => {
+            const borderColors = ['border-somali-red', 'border-forest-800', 'border-somali-red'];
+            return (
             <div
               key={event.id}
-              className="group bg-white rounded-2xl overflow-hidden shadow-sm border border-gray-100 hover:shadow-xl transition-all duration-300 hover:-translate-y-1 flex flex-col"
+              className={`group bg-white rounded-2xl overflow-hidden shadow-sm border-2 ${borderColors[idx]} hover:shadow-xl transition-all duration-300 hover:-translate-y-1 flex flex-col`}
             >
               {/* Image */}
               <div className="relative aspect-[16/9] overflow-hidden">
@@ -205,14 +207,14 @@ export default function Evenementen() {
 
                 <button
                   onClick={() => openModal(event)}
-                  className="group/btn w-full inline-flex items-center justify-center gap-2 px-5 py-3 bg-forest-800 text-white font-semibold rounded-xl hover:bg-forest-700 active:scale-95 transition-all duration-200"
+                  className="group/btn w-full inline-flex items-center justify-center gap-2 px-5 py-3 bg-gradient-to-r from-somali-red to-forest-800 text-white font-bold rounded-xl hover:shadow-lg hover:shadow-somali-red/30 active:scale-95 transition-all duration-200"
                 >
                   Inschrijven
                   <ArrowRight size={16} className="group-hover/btn:translate-x-1 transition-transform" />
                 </button>
               </div>
             </div>
-          ))}
+          )})}
         </div>
       </div>
 
@@ -411,7 +413,7 @@ export default function Evenementen() {
                   <button
                     type="submit"
                     disabled={modalState === 'submitting'}
-                    className="w-full py-3.5 bg-forest-800 text-white font-semibold rounded-xl hover:bg-forest-700 active:scale-95 transition-all duration-200 disabled:opacity-60 disabled:cursor-not-allowed mt-2"
+                    className="w-full py-3.5 bg-gradient-to-r from-somali-red to-forest-800 text-white font-bold rounded-xl hover:shadow-lg hover:shadow-somali-red/30 active:scale-95 transition-all duration-200 disabled:opacity-60 disabled:cursor-not-allowed mt-2"
                   >
                     {modalState === 'submitting' ? (
                       <span className="flex items-center justify-center gap-2">

@@ -28,7 +28,7 @@ export default function CallToAction() {
 
         <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black text-white leading-tight mb-6">
           Sluit je aan bij{' '}
-          <span className="text-forest-300">onze gemeenschap</span>
+          <span className="text-somali-red">onze gemeenschap</span>
         </h2>
         <p className="text-lg text-white/70 leading-relaxed mb-10 max-w-2xl mx-auto">
           Word lid van Stichting SLNL en draag bij aan een sterke, zichtbare en trotse
@@ -38,7 +38,7 @@ export default function CallToAction() {
         <div className="flex flex-wrap gap-4 justify-center">
           <button
             onClick={() => document.querySelector('#evenementen')?.scrollIntoView({ behavior: 'smooth' })}
-            className="group inline-flex items-center gap-2 px-8 py-4 bg-white text-forest-900 font-bold rounded-xl hover:bg-forest-50 active:scale-95 transition-all duration-200 shadow-xl"
+            className="group inline-flex items-center gap-2 px-8 py-4 bg-gradient-to-r from-somali-red to-white text-forest-900 font-black rounded-xl hover:shadow-xl hover:shadow-somali-red/40 active:scale-95 transition-all duration-200 border-2 border-white"
           >
             Doe Mee
             <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
@@ -49,7 +49,7 @@ export default function CallToAction() {
               e.preventDefault();
               document.querySelector('#contact')?.scrollIntoView({ behavior: 'smooth' });
             }}
-            className="inline-flex items-center gap-2 px-8 py-4 bg-transparent text-white font-semibold rounded-xl border-2 border-white/30 hover:border-white hover:bg-white/10 active:scale-95 transition-all duration-200"
+            className="inline-flex items-center gap-2 px-8 py-4 bg-transparent text-white font-bold rounded-xl border-2 border-somali-red hover:bg-somali-red/10 active:scale-95 transition-all duration-200"
           >
             Neem Contact Op
           </a>

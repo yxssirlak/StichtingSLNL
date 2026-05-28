@@ -33,13 +33,13 @@ export default function Navbar() {
       }`}
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-16 lg:h-20">
+        <div className="flex items-center justify-between h-20 lg:h-24">
           {/* Logo */}
-          <a href="#home" onClick={() => handleNavClick('#home')} className="flex items-center gap-3 group">
-            <img src="/SLNL_logo.png" alt="SLNL Logo" className="w-10 h-10 lg:w-12 lg:h-12 flex-shrink-0 group-hover:opacity-80 transition-opacity" />
-            <div className="hidden sm:block">
-              <div className="font-bold text-forest-800 text-sm lg:text-base leading-tight">Stichting SLNL</div>
-              <div className="text-xs text-gray-500 leading-tight">Somaliland Nederland</div>
+          <a href="#home" onClick={() => handleNavClick('#home')} className="flex items-center gap-4 group">
+            <img src="/SLNL_logo.png" alt="SLNL Logo" className="w-14 h-14 lg:w-16 lg:h-16 flex-shrink-0 group-hover:scale-105 transition-transform" />
+            <div className="hidden md:block">
+              <div className="font-black text-forest-800 text-base lg:text-lg leading-tight">STICHTING SLNL</div>
+              <div className="text-xs text-somali-red font-semibold leading-tight">Somaliland Nederland</div>
             </div>
           </a>
 
