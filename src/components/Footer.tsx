@@ -41,8 +41,8 @@ export default function Footer() {
             <div className="flex items-center gap-4 mb-6">
               <img src="/SLNL_logo.png" alt="SLNL Logo" className="w-16 h-16 flex-shrink-0" />
               <div>
-                <div className="font-black text-white text-lg">STICHTING SLNL</div>
-                <div className="text-xs text-somali-red font-semibold">Somaliland Nederland</div>
+                <div className="font-bold text-white text-lg">Stichting SLNL</div>
+                <div className="text-xs text-white/60">Somaliland Nederland</div>
               </div>
             </div>
             <p className="text-white/60 text-sm leading-relaxed max-w-sm mb-5">
@@ -108,9 +108,9 @@ export default function Footer() {
                 </a>
               </li>
             </ul>
-            <div className="bg-gradient-to-br from-somali-red/10 to-forest-800/10 border-2 border-somali-red/30 rounded-xl p-3">
-              <div className="text-xs text-white/60 uppercase tracking-wider font-bold mb-1">KvK nummer</div>
-              <div className="text-sm text-somali-red font-bold font-mono">XX.XXX.XXX</div>
+            <div className="bg-white/5 border border-white/10 rounded-xl p-3">
+              <div className="text-xs text-white/40 uppercase tracking-wider mb-1">KvK nummer</div>
+              <div className="text-sm text-white/70 font-mono">XX.XXX.XXX</div>
             </div>
           </div>
         </div>

@@ -35,12 +35,11 @@ export default function Hero() {
             {/* Headlines */}
             <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black text-gray-900 leading-tight mb-3">
               Meer zichtbaar,{' '}
-              <span className="bg-gradient-to-r from-forest-800 via-somali-red to-forest-700 bg-clip-text text-transparent">meer samen!</span>
+              <span className="text-forest-800">meer samen!</span>
             </h1>
-            <p className="text-xl sm:text-2xl font-bold text-somali-red mb-2">
+            <p className="text-xl sm:text-2xl font-semibold text-forest-700 italic mb-6 font-serif">
               "Ismuujin iyo midnimo"
             </p>
-            <p className="text-sm text-gray-400 uppercase tracking-widest font-semibold mb-6">Eenheid & Identiteit</p>
             <p className="text-base sm:text-lg text-gray-600 leading-relaxed mb-8 max-w-xl">
               Stichting SLNL versterkt de Somalilandse gemeenschap in Nederland en bouwt bruggen
               voor de internationale erkenning van Somaliland.
@@ -50,46 +49,46 @@ export default function Hero() {
             <div className="flex flex-wrap gap-4">
               <button
                 onClick={scrollToEvenementen}
-                className="group inline-flex items-center gap-2 px-7 py-4 bg-gradient-to-r from-somali-red to-forest-800 text-white font-bold rounded-xl hover:shadow-lg hover:shadow-somali-red/30 active:scale-95 transition-all duration-200"
+                className="group inline-flex items-center gap-2 px-7 py-4 bg-forest-800 text-white font-semibold rounded-xl hover:bg-forest-700 active:scale-95 transition-all duration-200 shadow-lg shadow-forest-800/20"
               >
                 Bekijk Evenementen
                 <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
               </button>
               <button
                 onClick={scrollToOverOns}
-                className="inline-flex items-center gap-2 px-7 py-4 bg-white text-forest-800 font-bold rounded-xl border-2 border-somali-red hover:bg-somali-red/5 active:scale-95 transition-all duration-200"
+                className="inline-flex items-center gap-2 px-7 py-4 bg-white text-forest-800 font-semibold rounded-xl border-2 border-forest-200 hover:border-forest-400 hover:bg-forest-50 active:scale-95 transition-all duration-200"
               >
                 Over Ons
               </button>
             </div>
 
             {/* Stats row */}
-            <div className="flex gap-8 mt-10 pt-8 border-t-2 border-somali-red/30">
+            <div className="flex gap-8 mt-10 pt-8 border-t border-gray-200">
               <div>
-                <div className="text-3xl font-black bg-gradient-to-r from-somali-red to-forest-800 bg-clip-text text-transparent">2012</div>
-                <div className="text-xs text-gray-500 mt-0.5 font-semibold uppercase tracking-wide">Opgericht</div>
+                <div className="text-2xl font-black text-forest-800">2012</div>
+                <div className="text-sm text-gray-500 mt-0.5">Opgericht</div>
               </div>
               <div>
-                <div className="text-3xl font-black text-forest-800">NL</div>
-                <div className="text-xs text-gray-500 mt-0.5 font-semibold uppercase tracking-wide">Heel Nederland</div>
+                <div className="text-2xl font-black text-forest-800">NL</div>
+                <div className="text-sm text-gray-500 mt-0.5">Heel Nederland</div>
               </div>
               <div>
-                <div className="text-3xl font-black text-somali-red">18 Mei</div>
-                <div className="text-xs text-gray-500 mt-0.5 font-semibold uppercase tracking-wide">Jaarlijkse Viering</div>
+                <div className="text-2xl font-black text-forest-800">18 Mei</div>
+                <div className="text-sm text-gray-500 mt-0.5">Jaarlijkse Viering</div>
               </div>
             </div>
           </div>
 
           {/* Image side */}
           <div className="order-1 lg:order-2 relative animate-fade-in">
-            <div className="relative rounded-2xl overflow-hidden shadow-2xl aspect-[4/3] lg:aspect-auto lg:h-[520px] border-4 border-somali-red">
+            <div className="relative rounded-2xl overflow-hidden shadow-2xl aspect-[4/3] lg:aspect-auto lg:h-[520px]">
               <img
                 src="https://images.pexels.com/photos/3889729/pexels-photo-3889729.jpeg"
                 alt="Somaliland landscape - Las Geel caves"
                 className="w-full h-full object-cover"
               />
               {/* Overlay gradient */}
-              <div className="absolute inset-0 bg-gradient-to-t from-forest-900/50 via-transparent to-transparent" />
+              <div className="absolute inset-0 bg-gradient-to-t from-forest-900/40 via-transparent to-transparent" />
 
               {/* Caption card */}
               <div className="absolute bottom-4 left-4 right-4 bg-white/90 backdrop-blur-sm rounded-xl p-4 shadow-lg">
@@ -110,10 +109,10 @@ export default function Hero() {
             </div>
 
             {/* Floating badge */}
-            <div className="absolute -top-6 -right-6 w-28 h-28 bg-gradient-to-br from-somali-red to-forest-800 rounded-3xl flex flex-col items-center justify-center text-white shadow-xl rotate-3 border-2 border-white">
-              <span className="text-3xl font-black leading-none">18</span>
-              <span className="text-sm font-bold uppercase tracking-wider">Mei</span>
-              <span className="text-xs font-semibold opacity-90">Somaliland</span>
+            <div className="absolute -top-4 -right-4 w-24 h-24 bg-forest-800 rounded-2xl flex flex-col items-center justify-center text-white shadow-xl rotate-3">
+              <span className="text-2xl font-black leading-none">18</span>
+              <span className="text-xs font-semibold uppercase tracking-wide">Mei</span>
+              <span className="text-xs opacity-80">Viering</span>
             </div>
           </div>
         </div>

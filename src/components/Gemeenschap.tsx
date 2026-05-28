@@ -45,11 +45,11 @@ export default function Gemeenschap() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <div className="text-center max-w-2xl mx-auto mb-16">
-          <span className="inline-block px-5 py-2 bg-gradient-to-r from-forest-800/10 to-somali-red/10 text-forest-800 text-xs font-black uppercase tracking-widest rounded-full border-2 border-somali-red/30 mb-6">
+          <span className="inline-block px-4 py-1.5 bg-white text-forest-700 text-xs font-bold uppercase tracking-widest rounded-full border border-forest-100 mb-4">
             Onze Gemeenschap
           </span>
           <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black text-gray-900 leading-tight mb-4">
-            <span className="text-somali-red">Wie</span> wij zijn
+            Wie wij zijn
           </h2>
           <p className="text-gray-500 text-base lg:text-lg">
             De Somalilandse gemeenschap in Nederland is divers, energiek en cultureel rijk.
@@ -59,13 +59,12 @@ export default function Gemeenschap() {
 
         {/* Pillars grid */}
         <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          {pillars.map((pillar, idx) => {
+          {pillars.map((pillar) => {
             const Icon = pillar.icon;
-            const borderColors = ['border-somali-red', 'border-forest-800', 'border-somali-red', 'border-forest-800'];
             return (
               <div
                 key={pillar.title}
-                className={`group rounded-2xl border-2 ${borderColors[idx]} ${pillar.color} p-6 hover:shadow-lg transition-all duration-300 hover:-translate-y-1`}
+                className={`group rounded-2xl border ${pillar.color} p-6 hover:shadow-lg transition-all duration-300 hover:-translate-y-1`}
               >
                 {/* Image */}
                 <div className="rounded-xl overflow-hidden aspect-[4/3] mb-5 shadow-sm">

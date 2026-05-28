@@ -39,7 +39,7 @@ export default function Navbar() {
             <img src="/SLNL_logo.png" alt="SLNL Logo" className="w-14 h-14 lg:w-16 lg:h-16 flex-shrink-0 group-hover:scale-105 transition-transform" />
             <div className="hidden md:block">
               <div className="font-black text-forest-800 text-base lg:text-lg leading-tight">STICHTING SLNL</div>
-              <div className="text-xs text-somali-red font-semibold leading-tight">Somaliland Nederland</div>
+              <div className="text-xs text-gray-600 font-semibold leading-tight">Somaliland Nederland</div>
             </div>
           </a>
 

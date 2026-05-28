@@ -42,11 +42,11 @@ export default function Activiteiten() {
         {/* Header */}
         <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-6 mb-16">
           <div className="max-w-2xl">
-            <span className="inline-block px-5 py-2 bg-gradient-to-r from-somali-red/10 to-forest-800/10 text-forest-800 text-xs font-black uppercase tracking-widest rounded-full border-2 border-somali-red/30 mb-6">
+            <span className="inline-block px-4 py-1.5 bg-forest-50 text-forest-700 text-xs font-bold uppercase tracking-widest rounded-full border border-forest-100 mb-4">
               Activiteiten
             </span>
             <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black text-gray-900 leading-tight">
-              <span className="text-somali-red">Wat</span> wij doen
+              Wat wij doen
             </h2>
           </div>
           <p className="text-gray-500 lg:max-w-sm text-sm lg:text-base">
@@ -59,11 +59,10 @@ export default function Activiteiten() {
         <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
           {activities.map((activity, index) => {
             const Icon = activity.icon;
-            const borderColors = ['border-somali-red', 'border-forest-800', 'border-somali-red', 'border-forest-800'];
             return (
               <div
                 key={activity.title}
-                className={`group relative rounded-2xl border-2 ${borderColors[index]} bg-white p-6 hover:shadow-xl transition-all duration-300 hover:-translate-y-1 overflow-hidden`}
+                className="group relative rounded-2xl border border-gray-100 bg-white p-6 hover:shadow-xl transition-all duration-300 hover:-translate-y-1 overflow-hidden"
               >
                 {/* Background number */}
                 <div className="absolute -bottom-4 -right-2 text-8xl font-black text-gray-50 pointer-events-none select-none">
@@ -71,11 +70,7 @@ export default function Activiteiten() {
                 </div>
 
                 {/* Icon */}
-                <div className={`w-12 h-12 rounded-xl flex items-center justify-center mb-5 group-hover:shadow-lg transition-all ${
-                  index % 2 === 0
-                    ? 'bg-gradient-to-br from-somali-red to-forest-800'
-                    : 'bg-gradient-to-br from-forest-800 to-somali-red'
-                }`}>
+                <div className="w-12 h-12 bg-forest-800 rounded-xl flex items-center justify-center mb-5 group-hover:bg-forest-700 transition-colors">
                   <Icon size={22} className="text-white" />
                 </div>
 
