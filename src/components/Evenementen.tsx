@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Calendar, MapPin, Users, X, CheckCircle, Clock, ArrowRight } from 'lucide-react';
+import { Calendar, MapPin, Users, X, Clock, ArrowRight } from 'lucide-react';
 import { supabase, EventRegistration } from '../lib/supabase';
 
 type Event = {
@@ -226,9 +226,7 @@ export default function Evenementen() {
             {modalState === 'success' && confirmationData ? (
               /* Success state */
               <div className="p-8 text-center">
-                <div className="w-16 h-16 bg-forest-100 rounded-full flex items-center justify-center mx-auto mb-5">
-                  <CheckCircle size={32} className="text-forest-700" />
-                </div>
+                <img src="/SLNL_logo.png" alt="SLNL" className="w-16 h-16 mx-auto mb-5" />
                 <h3 className="text-2xl font-black text-gray-900 mb-2">
                   Bedankt voor je inschrijving!
                 </h3>
@@ -294,9 +292,12 @@ export default function Evenementen() {
                   >
                     <X size={16} />
                   </button>
-                  <div className="absolute bottom-4 left-5 right-5">
-                    <h3 className="text-lg font-bold text-white text-shadow">{selectedEvent.title}</h3>
-                    <p className="text-sm text-white/80">{selectedEvent.date} · {selectedEvent.location}</p>
+                  <div className="absolute bottom-4 left-5 right-5 flex items-center gap-3">
+                    <img src="/SLNL_logo.png" alt="SLNL" className="w-10 h-10 flex-shrink-0" />
+                    <div>
+                      <h3 className="text-lg font-bold text-white text-shadow">{selectedEvent.title}</h3>
+                      <p className="text-sm text-white/80">{selectedEvent.date} · {selectedEvent.location}</p>
+                    </div>
                   </div>
                 </div>
 

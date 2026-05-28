@@ -36,9 +36,7 @@ export default function Navbar() {
         <div className="flex items-center justify-between h-16 lg:h-20">
           {/* Logo */}
           <a href="#home" onClick={() => handleNavClick('#home')} className="flex items-center gap-3 group">
-            <div className="w-10 h-10 lg:w-12 lg:h-12 rounded-full bg-forest-800 flex items-center justify-center flex-shrink-0 group-hover:bg-forest-700 transition-colors">
-              <span className="text-white font-bold text-sm lg:text-base">SL</span>
-            </div>
+            <img src="/SLNL_logo.png" alt="SLNL Logo" className="w-10 h-10 lg:w-12 lg:h-12 flex-shrink-0 group-hover:opacity-80 transition-opacity" />
             <div className="hidden sm:block">
               <div className="font-bold text-forest-800 text-sm lg:text-base leading-tight">Stichting SLNL</div>
               <div className="text-xs text-gray-500 leading-tight">Somaliland Nederland</div>

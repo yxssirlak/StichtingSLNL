@@ -39,9 +39,7 @@ export default function Footer() {
           {/* Brand */}
           <div className="lg:col-span-2">
             <div className="flex items-center gap-3 mb-4">
-              <div className="w-10 h-10 rounded-full bg-forest-700 flex items-center justify-center">
-                <span className="text-white font-bold text-sm">SL</span>
-              </div>
+              <img src="/SLNL_logo.png" alt="SLNL Logo" className="w-12 h-12 flex-shrink-0" />
               <div>
                 <div className="font-bold text-white">Stichting SLNL</div>
                 <div className="text-xs text-white/50">Somaliland Nederland</div>

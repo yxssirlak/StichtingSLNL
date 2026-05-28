@@ -68,9 +68,7 @@ export default function Contact() {
           <div className="bg-gray-50 rounded-2xl p-6 lg:p-8 border border-gray-100">
             {sent ? (
               <div className="h-full flex flex-col items-center justify-center text-center py-8">
-                <div className="w-16 h-16 bg-forest-100 rounded-full flex items-center justify-center mb-4">
-                  <Send size={24} className="text-forest-700" />
-                </div>
+                <img src="/SLNL_logo.png" alt="SLNL" className="w-16 h-16 mx-auto mb-4" />
                 <h3 className="text-xl font-bold text-gray-900 mb-2">Bericht verstuurd!</h3>
                 <p className="text-gray-500 text-sm">
                   Bedankt voor je bericht. We nemen zo snel mogelijk contact met je op.

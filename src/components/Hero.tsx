@@ -93,9 +93,7 @@ export default function Hero() {
               {/* Caption card */}
               <div className="absolute bottom-4 left-4 right-4 bg-white/90 backdrop-blur-sm rounded-xl p-4 shadow-lg">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 bg-forest-800 rounded-lg flex items-center justify-center flex-shrink-0">
-                    <span className="text-white text-xs font-bold">SL</span>
-                  </div>
+                  <img src="/SLNL_logo.png" alt="SLNL" className="w-10 h-10 flex-shrink-0" />
                   <div>
                     <p className="font-semibold text-gray-900 text-sm">Somaliland</p>
                     <p className="text-xs text-gray-500">Cultuur &amp; Erfgoed</p>
