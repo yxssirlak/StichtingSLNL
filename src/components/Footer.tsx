@@ -1,18 +1,18 @@
 import { Phone, Mail, ExternalLink } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 const quickLinks = [
-  { label: 'Home', href: '#home' },
-  { label: 'Over Ons', href: '#over-ons' },
-  { label: 'Onze Gemeenschap', href: '#gemeenschap' },
-  { label: 'Activiteiten', href: '#activiteiten' },
-  { label: 'Evenementen', href: '#evenementen' },
-  { label: 'Contact', href: '#contact' },
+  { label: 'Home', href: '/' },
+  { label: 'Over Ons', href: '/over-ons' },
+  { label: 'Onze Gemeenschap', href: '/gemeenschap' },
+  { label: 'Activiteiten', href: '/activiteiten' },
+  { label: 'Evenementen', href: '/evenementen' },
+  { label: 'Contact', href: '/contact' },
 ];
 
 export default function Footer() {
-  const handleNavClick = (href: string) => {
-    const el = document.querySelector(href);
-    if (el) el.scrollIntoView({ behavior: 'smooth' });
+  const scrollToTop = () => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   return (
@@ -25,13 +25,6 @@ export default function Footer() {
           className="w-full h-full object-cover opacity-10"
         />
         <div className="absolute inset-0 bg-gradient-to-b from-forest-950/90 via-forest-950/95 to-forest-950" />
-      </div>
-
-      {/* Top accent line — Somaliland flag colors */}
-      <div className="relative h-1 flex">
-        <div className="flex-1 bg-forest-600" />
-        <div className="flex-1 bg-white" />
-        <div className="flex-1 bg-somali-red" />
       </div>
 
       <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-14 pb-8">
@@ -51,18 +44,18 @@ export default function Footer() {
             </p>
             <div className="flex flex-col gap-2">
               <a
-                href="tel:+31687950151"
+                href="tel:+31611226129"
                 className="inline-flex items-center gap-2 text-sm text-white/60 hover:text-white transition-colors"
               >
                 <Phone size={14} />
-                <span>(+31) 6 87950151</span>
+                <span>+31 6 11226129</span>
               </a>
               <a
-                href="mailto:info@slnl.nl"
+                href="mailto:info@somalilandnederland.nl"
                 className="inline-flex items-center gap-2 text-sm text-white/60 hover:text-white transition-colors"
               >
                 <Mail size={14} />
-                <span>info@slnl.nl</span>
+                <span>info@somalilandnederland.nl</span>
               </a>
             </div>
           </div>
@@ -75,12 +68,13 @@ export default function Footer() {
             <ul className="space-y-2">
               {quickLinks.map((link) => (
                 <li key={link.href}>
-                  <button
-                    onClick={() => handleNavClick(link.href)}
+                  <Link
+                    to={link.href}
+                    onClick={scrollToTop}
                     className="text-sm text-white/60 hover:text-white transition-colors text-left"
                   >
                     {link.label}
-                  </button>
+                  </Link>
                 </li>
               ))}
             </ul>

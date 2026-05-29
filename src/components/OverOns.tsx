@@ -1,87 +1,109 @@
-import { ArrowRight, CheckCircle } from 'lucide-react';
-
-const highlights = [
-  'Gemeenschapsopbouw in heel Nederland',
-  'Culturele evenementen en vieringen',
-  'Jeugdprogramma\'s en begeleiding',
-  'Internationale erkenning van Somaliland',
-];
+import { Target, Eye, Flag, ShieldCheck } from 'lucide-react';
 
 export default function OverOns() {
   return (
-    <section id="over-ons" className="py-20 lg:py-28 bg-white">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Section label */}
-        <div className="text-center mb-12">
-          <span className="inline-block px-4 py-1.5 bg-forest-50 text-forest-700 text-xs font-bold uppercase tracking-widest rounded-full border border-forest-100">
-            Over Ons
-          </span>
+    <div className="w-full bg-white pb-20">
+      
+      {/* Pagina Header Banner */}
+      <div className="relative pt-32 pb-20 lg:pt-40 lg:pb-28 bg-forest-950 overflow-hidden">
+        <div className="absolute inset-0">
+          <img 
+            src="https://images.pexels.com/photos/3889729/pexels-photo-3889729.jpeg" 
+            alt="Somaliland" 
+            className="w-full h-full object-cover opacity-20"
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-forest-950 to-transparent" />
         </div>
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <h1 className="text-4xl md:text-5xl lg:text-6xl font-black text-white mb-6">
+            Over Stichting SLNL
+          </h1>
+          <p className="text-xl text-white/80 max-w-2xl mx-auto font-light">
+            De verbindende factor voor de Somalilandse gemeenschap in Nederland sinds 2012.
+          </p>
+        </div>
+      </div>
 
-        <div className="grid lg:grid-cols-2 gap-12 lg:gap-20 items-center">
-          {/* Images grid */}
-          <div className="relative grid grid-cols-2 gap-4">
-            <div className="rounded-2xl overflow-hidden aspect-[3/4] shadow-lg">
-              <img
-                src="https://images.pexels.com/photos/6647037/pexels-photo-6647037.jpeg"
-                alt="Gemeenschap bijeenkomst"
-                className="w-full h-full object-cover hover:scale-105 transition-transform duration-500"
-              />
-            </div>
-            <div className="rounded-2xl overflow-hidden aspect-[3/4] mt-8 shadow-lg">
-              <img
-                src="https://images.pexels.com/photos/3184418/pexels-photo-3184418.jpeg"
-                alt="Cultureel evenement"
-                className="w-full h-full object-cover hover:scale-105 transition-transform duration-500"
-              />
-            </div>
-            {/* Decorative element */}
-            <div className="absolute -bottom-6 -left-6 w-32 h-32 bg-forest-50 rounded-2xl -z-10" />
-            <div className="absolute -top-6 -right-6 w-24 h-24 bg-forest-100 rounded-2xl -z-10" />
-
-            {/* Badge */}
-            <div className="absolute bottom-4 left-1/2 -translate-x-1/2 bg-forest-800 text-white rounded-xl px-5 py-3 shadow-xl text-center whitespace-nowrap">
-              <div className="text-lg font-black">Opgericht 2012</div>
-              <div className="text-xs opacity-80">Verbindende factor in NL</div>
-            </div>
-          </div>
-
-          {/* Text block */}
+      {/* Het Verhaal */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-16 lg:mt-24">
+        <div className="grid lg:grid-cols-2 gap-16 items-center">
           <div>
-            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black text-gray-900 leading-tight mb-6">
-              De verbindende factor voor{' '}
-              <span className="text-forest-800">Somaliland</span> in Nederland
-            </h2>
-            <p className="text-gray-600 leading-relaxed mb-6 text-base lg:text-lg">
-              Sinds 2012 is Stichting SLNL de verbindende factor voor de Somalilandse gemeenschap
-              in Nederland. Wij organiseren culturele evenementen, bieden ondersteuning aan
-              nieuwkomers en werken aan de internationale erkenning van Somaliland.
+            <h2 className="text-3xl font-black text-gray-900 mb-6">Onze Geschiedenis</h2>
+            <p className="text-lg text-gray-600 mb-4 leading-relaxed">
+              Stichting Somaliland Nederland (SLNL) is in 2012 opgericht door een groep gedreven Somalilanders. Wat begon als een klein initiatief om landgenoten bij elkaar te brengen, is uitgegroeid tot een professionele organisatie die de belangen behartigt van naar schatting 15.000 Somalilanders in Nederland.
             </p>
-            <p className="text-gray-600 leading-relaxed mb-8 text-base lg:text-lg">
-              Onze stichting brengt mensen samen, versterkt culturele identiteit en zorgt ervoor
-              dat de Somalilandse stem in Nederland gehoord wordt.
+            <p className="text-lg text-gray-600 leading-relaxed">
+              We zagen de behoefte aan een centraal platform waar we niet alleen onze cultuur konden vieren, maar ook samen konden werken aan participatie in de Nederlandse samenleving en de ontwikkeling van ons thuisland.
             </p>
-
-            {/* Highlights list */}
-            <ul className="space-y-3 mb-8">
-              {highlights.map((item) => (
-                <li key={item} className="flex items-start gap-3">
-                  <CheckCircle size={20} className="text-forest-600 mt-0.5 flex-shrink-0" />
-                  <span className="text-gray-700 text-sm lg:text-base">{item}</span>
-                </li>
-              ))}
-            </ul>
-
-            <button
-              onClick={() => document.querySelector('#gemeenschap')?.scrollIntoView({ behavior: 'smooth' })}
-              className="group inline-flex items-center gap-2 px-6 py-3.5 bg-forest-800 text-white font-semibold rounded-xl hover:bg-forest-700 active:scale-95 transition-all duration-200 shadow-lg shadow-forest-800/20"
-            >
-              Lees Verder
-              <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
-            </button>
+          </div>
+          <div className="relative">
+            <div className="aspect-square rounded-full bg-forest-50 absolute -inset-4 lg:-inset-8 -z-10" />
+            <img 
+              src="https://images.pexels.com/photos/1181438/pexels-photo-1181438.jpeg" 
+              alt="Team" 
+              className="w-full h-[400px] object-cover rounded-2xl shadow-xl"
+            />
           </div>
         </div>
       </div>
-    </section>
+
+      {/* Missie en Visie Grid */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-24">
+        <div className="grid md:grid-cols-2 gap-8">
+          <div className="bg-forest-50 p-10 rounded-3xl border border-forest-100">
+            <div className="w-16 h-16 bg-forest-800 rounded-2xl flex items-center justify-center text-white mb-6 shadow-lg">
+              <Target size={32} />
+            </div>
+            <h3 className="text-2xl font-black text-gray-900 mb-4">Onze Missie</h3>
+            <p className="text-gray-700 leading-relaxed text-lg">
+              Onze missie is het versterken, verbinden en emanciperen van de Somalilandse gemeenschap in Nederland. Wij bieden een platform voor ontmoeting, educatie en culturele uitwisseling. Tegelijkertijd bouwen wij actieve bruggen tussen Nederland en Somaliland om bij te dragen aan wederzijds begrip en ontwikkeling.
+            </p>
+          </div>
+
+          <div className="bg-gray-50 p-10 rounded-3xl border border-gray-200">
+            <div className="w-16 h-16 bg-gray-900 rounded-2xl flex items-center justify-center text-white mb-6 shadow-lg">
+              <Eye size={32} />
+            </div>
+            <h3 className="text-2xl font-black text-gray-900 mb-4">Onze Visie</h3>
+            <p className="text-gray-700 leading-relaxed text-lg">
+              Wij zien een toekomst voor ons waarin Somalilanders volledig en succesvol participeren in de Nederlandse maatschappij, met behoud van hun unieke culturele identiteit en trots. Daarnaast streven wij naar de dag waarop Somaliland de internationale diplomatieke erkenning krijgt die het verdient als stabiele, democratische natie.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {/* Kernwaarden */}
+      <div className="bg-forest-900 mt-24 py-20">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-16">
+            <h2 className="text-3xl font-black text-white">Onze Kernwaarden</h2>
+          </div>
+          <div className="grid md:grid-cols-3 gap-8 text-center">
+            <div>
+              <div className="w-16 h-16 mx-auto bg-white/10 rounded-full flex items-center justify-center text-white mb-6">
+                <Flag size={32} />
+              </div>
+              <h4 className="text-xl font-bold text-white mb-3">Identiteit & Trots</h4>
+              <p className="text-white/70">We koesteren onze rijke Somalilandse cultuur, poëzie en democratische tradities.</p>
+            </div>
+            <div>
+              <div className="w-16 h-16 mx-auto bg-white/10 rounded-full flex items-center justify-center text-white mb-6">
+                <ShieldCheck size={32} />
+              </div>
+              <h4 className="text-xl font-bold text-white mb-3">Samenwerking</h4>
+              <p className="text-white/70">Alleen ga je sneller, samen kom je verder. We werken lokaal en internationaal samen.</p>
+            </div>
+            <div>
+              <div className="w-16 h-16 mx-auto bg-white/10 rounded-full flex items-center justify-center text-white mb-6">
+                <Target size={32} />
+              </div>
+              <h4 className="text-xl font-bold text-white mb-3">Vooruitgang</h4>
+              <p className="text-white/70">We stimuleren ondernemerschap, educatie en politieke participatie onder de jeugd.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
   );
 }

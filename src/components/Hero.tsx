@@ -1,18 +1,11 @@
+import { Link } from 'react-router-dom';
 import { ArrowRight, ChevronDown } from 'lucide-react';
 
 export default function Hero() {
-  const scrollToOverOns = () => {
-    document.querySelector('#over-ons')?.scrollIntoView({ behavior: 'smooth' });
-  };
-
-  const scrollToEvenementen = () => {
-    document.querySelector('#evenementen')?.scrollIntoView({ behavior: 'smooth' });
-  };
-
   return (
     <section
       id="home"
-      className="relative min-h-screen flex items-center pt-16 lg:pt-20 overflow-hidden bg-gradient-to-br from-gray-50 to-white"
+      className="relative min-h-screen flex items-center pt-8 lg:pt-12 overflow-hidden bg-gradient-to-br from-gray-50 to-white"
     >
       {/* Background decoration */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
@@ -47,19 +40,19 @@ export default function Hero() {
 
             {/* CTA buttons */}
             <div className="flex flex-wrap gap-4">
-              <button
-                onClick={scrollToEvenementen}
+              <Link
+                to="/evenementen"
                 className="group inline-flex items-center gap-2 px-7 py-4 bg-forest-800 text-white font-semibold rounded-xl hover:bg-forest-700 active:scale-95 transition-all duration-200 shadow-lg shadow-forest-800/20"
               >
                 Bekijk Evenementen
                 <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
-              </button>
-              <button
-                onClick={scrollToOverOns}
+              </Link>
+              <Link
+                to="/over-ons"
                 className="inline-flex items-center gap-2 px-7 py-4 bg-white text-forest-800 font-semibold rounded-xl border-2 border-forest-200 hover:border-forest-400 hover:bg-forest-50 active:scale-95 transition-all duration-200"
               >
                 Over Ons
-              </button>
+              </Link>
             </div>
 
             {/* Stats row */}
@@ -117,15 +110,6 @@ export default function Hero() {
           </div>
         </div>
       </div>
-
-      {/* Scroll indicator */}
-      <button
-        onClick={scrollToOverOns}
-        className="absolute bottom-8 left-1/2 -translate-x-1/2 text-gray-400 hover:text-forest-700 transition-colors animate-bounce"
-        aria-label="Scroll naar beneden"
-      >
-        <ChevronDown size={28} />
-      </button>
     </section>
   );
 }
