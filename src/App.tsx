@@ -3,12 +3,11 @@ import Navbar from './components/Navbar';
 import Home from './components/Home';
 import OverOns from './components/OverOns';
 import Gemeenschap from './components/Gemeenschap';
-import Activiteiten from './components/Activiteiten';
 import Evenementen from './components/Evenementen';
 import Contact from './components/Contact';
 import Footer from './components/Footer';
 import Admin from './components/Admin';
-import Gallerij from './components/Gallerij'; // <-- 1. Importeer je nieuwe galerij component
+import Gallerij from './components/Gallerij';
 
 const HomePage = () => (
   <>
@@ -27,9 +26,8 @@ export default function App() {
             <Route path="/" element={<HomePage />} />
             <Route path="/over-ons" element={<OverOns />} />
             <Route path="/gemeenschap" element={<Gemeenschap />} />
-            <Route path="/activiteiten" element={<Activiteiten />} />
             <Route path="/evenementen" element={<Evenementen />} />
-            <Route path="/galerij" element={<Gallerij />} /> {/* <-- 2. Voeg de route toe */}
+            <Route path="/galerij" element={<Gallerij />} />
             <Route path="/contact" element={<Contact />} />
             <Route path="/admin" element={<Admin />} />
           </Routes>

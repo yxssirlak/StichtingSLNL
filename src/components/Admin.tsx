@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
-import { Save, Lock, LogOut, Loader2, Upload, Users, PlusCircle, Search, Download, ImagePlus, X } from 'lucide-react';
+import { Save, Lock, LogOut, Loader2, Upload, Users, PlusCircle, Search, Download, ImagePlus, X, Trash2 } from 'lucide-react';
 import { Session } from '@supabase/supabase-js';
 
 export default function Admin() {
@@ -23,6 +23,7 @@ export default function Admin() {
   const [inschrijvenMogelijk, setInschrijvenMogelijk] = useState(false);
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [melding, setMelding] = useState({ text: '', type: '' });
+  const [bestaandeEvenementen, setBestaandeEvenementen] = useState<any[]>([]);
 
   // --- STATE INSCHRIJVINGEN ---
   const [inschrijvingen, setInschrijvingen] = useState<any[]>([]);
@@ -34,6 +35,7 @@ export default function Admin() {
   const [galTitel, setGalTitel] = useState('');
   const [galBeschrijving, setGalBeschrijving] = useState('');
   const [galFiles, setGalFiles] = useState<File[]>([]);
+  const [bestaandeAlbums, setBestaandeAlbums] = useState<any[]>([]);
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => setSession(session));
@@ -58,14 +60,26 @@ export default function Admin() {
   }, []);
 
   useEffect(() => {
+    if (activeTab === 'toevoegen') fetchEvenementen();
     if (activeTab === 'inschrijvingen') fetchInschrijvingen();
+    if (activeTab === 'galerij') fetchAlbums();
   }, [activeTab]);
+
+  const fetchEvenementen = async () => {
+    const { data } = await supabase.from('evenementen').select('*').order('datum', { ascending: true });
+    if (data) setBestaandeEvenementen(data);
+  };
 
   const fetchInschrijvingen = async () => {
     setLoadingInschrijvingen(true);
-    const { data, error } = await supabase.from('inschrijvingen').select('*').order('created_at', { ascending: false }); 
+    const { data } = await supabase.from('inschrijvingen').select('*').order('created_at', { ascending: false }); 
     if (data) setInschrijvingen(data);
     setLoadingInschrijvingen(false);
+  };
+
+  const fetchAlbums = async () => {
+    const { data } = await supabase.from('galerij').select('*').order('created_at', { ascending: false });
+    if (data) setBestaandeAlbums(data);
   };
 
   const handleLogin = async (e: React.FormEvent) => {
@@ -76,6 +90,7 @@ export default function Admin() {
     setLoading(false);
   };
 
+  // --- SUBMIT: EVENEMENT OPSLAAN ---
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
@@ -84,10 +99,11 @@ export default function Admin() {
     let finalImageUrl = '';
     if (imageFile) {
       const fileExt = imageFile.name.split('.').pop();
-      const fileName = `${Math.random()}.${fileExt}`;
+      const fileName = `evenement-${Math.random()}.${fileExt}`;
       const { error: uploadError } = await supabase.storage.from('evenement-fotos').upload(fileName, imageFile);
       if (uploadError) {
         setMelding({ text: 'Foto upload mislukt: ' + uploadError.message, type: 'error' });
+        window.scrollTo({ top: 0, behavior: 'smooth' });
         setLoading(false); return;
       }
       const { data: { publicUrl } } = supabase.storage.from('evenement-fotos').getPublicUrl(fileName);
@@ -103,14 +119,61 @@ export default function Admin() {
     } else {
       setMelding({ text: 'Evenement succesvol opgeslagen!', type: 'success' });
       setTitel(''); setDatum(''); setTijd(''); setLocatie(''); setType(''); setBeschrijving(''); setIsHoofd(false); setInschrijvenMogelijk(false); setImageFile(null);
+      fetchEvenementen(); 
     }
+    window.scrollTo({ top: 0, behavior: 'smooth' });
     setLoading(false);
   };
 
+  // --- DELETE: EVENEMENT VERWIJDEREN (BULLETPROOF) ---
+  const handleDeleteEvenement = async (ev: any) => {
+    if (!window.confirm(`Weet je zeker dat je "${ev.titel}" wilt verwijderen? Dit wist ook eventuele inschrijvingen voor dit evenement.`)) return;
+    
+    setLoading(true);
+
+    try {
+      // 1. Verwijder foto
+      if (ev.afbeelding_url) {
+        const fileName = ev.afbeelding_url.split('/').pop();
+        if (fileName) {
+          await supabase.storage.from('evenement-fotos').remove([fileName]);
+        }
+      }
+
+      // 2. Verwijder inschrijvingen
+      await supabase.from('inschrijvingen').delete().eq('evenement_titel', ev.titel);
+
+      // 3. Verwijder evenement (Valback naar titel als 'id' mist in database)
+      let deleteQuery = supabase.from('evenementen').delete();
+      if (ev.id) {
+        deleteQuery = deleteQuery.eq('id', ev.id);
+      } else {
+        deleteQuery = deleteQuery.eq('titel', ev.titel);
+      }
+
+      const { error } = await deleteQuery;
+      
+      if (error) {
+        alert("Fout vanuit de database: " + error.message);
+        throw error;
+      }
+      
+      setMelding({ text: 'Evenement succesvol verwijderd.', type: 'success' });
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      fetchEvenementen();
+    } catch (error: any) {
+      alert('Er ging iets mis bij het verwijderen: ' + (error.message || 'Onbekende fout'));
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // --- SUBMIT: ALBUM OPSLAAN ---
   const handleGallerySubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (galFiles.length === 0) {
       setMelding({ text: 'Selecteer a.u.b. minimaal 1 foto.', type: 'error' });
+      window.scrollTo({ top: 0, behavior: 'smooth' });
       return;
     }
     setLoading(true);
@@ -140,8 +203,62 @@ export default function Admin() {
     } else {
       setMelding({ text: 'Album succesvol opgeslagen!', type: 'success' });
       setGalTitel(''); setGalBeschrijving(''); setGalFiles([]);
+      fetchAlbums();
     }
+    window.scrollTo({ top: 0, behavior: 'smooth' });
     setLoading(false);
+  };
+
+  // --- DELETE: ALBUM VERWIJDEREN (BULLETPROOF) ---
+  const handleDeleteAlbum = async (album: any) => {
+    if (!window.confirm(`Weet je zeker dat je "${album.titel}" (en alle bijbehorende foto's) wilt verwijderen?`)) return;
+    
+    setLoading(true);
+
+    try {
+      const urls = extractUrls(album.afbeelding_urls);
+      if (urls && urls.length > 0) {
+        const fileNames = urls.map((url: string) => url.split('/').pop()).filter(Boolean) as string[];
+        if (fileNames.length > 0) {
+          await supabase.storage.from('evenement-fotos').remove(fileNames);
+        }
+      }
+
+      let deleteQuery = supabase.from('galerij').delete();
+      if (album.id) {
+        deleteQuery = deleteQuery.eq('id', album.id);
+      } else {
+        deleteQuery = deleteQuery.eq('titel', album.titel);
+      }
+
+      const { error } = await deleteQuery;
+      
+      if (error) {
+        alert("Fout vanuit de database: " + error.message);
+        throw error;
+      }
+      
+      setMelding({ text: 'Album succesvol verwijderd.', type: 'success' });
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      fetchAlbums();
+    } catch (error: any) {
+      alert('Er ging iets mis bij het verwijderen: ' + (error.message || 'Onbekende fout'));
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const extractUrls = (ruweData: any): string[] => {
+    if (!ruweData) return [];
+    if (Array.isArray(ruweData)) return ruweData;
+    if (typeof ruweData === 'string') {
+      try {
+        const parsed = JSON.parse(ruweData);
+        if (typeof parsed === 'string') return JSON.parse(parsed);
+        return Array.isArray(parsed) ? parsed : [];
+      } catch (e) { return []; }
+    }
+    return [];
   };
 
   const uniekeEvenementen = Array.from(new Set(inschrijvingen.map(i => i.evenement_titel)));
@@ -201,7 +318,7 @@ export default function Admin() {
               <PlusCircle size={18} /> Evenement
             </button>
             <button onClick={() => setActiveTab('galerij')} className={`flex-1 min-w-[150px] flex items-center justify-center gap-2 py-3 rounded-xl font-bold transition-all ${activeTab === 'galerij' ? 'bg-forest-50 text-forest-800' : 'text-gray-500 hover:bg-gray-50'}`}>
-              <ImagePlus size={18} /> Nieuw Album
+              <ImagePlus size={18} /> Foto Albums
             </button>
             <button onClick={() => setActiveTab('inschrijvingen')} className={`flex-1 min-w-[150px] flex items-center justify-center gap-2 py-3 rounded-xl font-bold transition-all ${activeTab === 'inschrijvingen' ? 'bg-forest-50 text-forest-800' : 'text-gray-500 hover:bg-gray-50'}`}>
               <Users size={18} /> Inschrijvingen
@@ -209,12 +326,13 @@ export default function Admin() {
           </div>
         </div>
 
-        {/* TAB 1: NIEUW EVENEMENT */}
+        {/* TAB 1: EVENEMENTEN BEHEREN */}
         {activeTab === 'toevoegen' && (
-          <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden animate-fade-in">
-            <form onSubmit={handleSubmit} className="p-8 space-y-6">
-              {melding.text && <div className={`p-4 rounded-xl text-sm font-bold ${melding.type === 'error' ? 'bg-red-50 text-red-700' : 'bg-green-50 text-green-700'}`}>{melding.text}</div>}
-              
+          <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8 animate-fade-in">
+            {melding.text && <div className={`mb-6 p-4 rounded-xl text-sm font-bold ${melding.type === 'error' ? 'bg-red-50 text-red-700' : 'bg-green-50 text-green-700'}`}>{melding.text}</div>}
+            
+            <h2 className="text-2xl font-black mb-6">Nieuw Evenement Inplannen</h2>
+            <form onSubmit={handleSubmit} className="space-y-6">
               <div className="grid md:grid-cols-2 gap-6">
                 <div className="space-y-2"><label className="text-sm font-bold text-gray-700">Titel van evenement</label><input type="text" value={titel} onChange={e => setTitel(e.target.value)} className="w-full p-3 rounded-xl border outline-none focus:border-forest-500" required /></div>
                 <div className="space-y-2"><label className="text-sm font-bold text-gray-700">Datum</label><input type="date" value={datum} onChange={e => setDatum(e.target.value)} className="w-full p-3 rounded-xl border outline-none focus:border-forest-500" required /></div>
@@ -236,10 +354,10 @@ export default function Admin() {
               <div className="space-y-2"><label className="text-sm font-bold text-gray-700">Locatie</label><input type="text" value={locatie} onChange={e => setLocatie(e.target.value)} className="w-full p-3 rounded-xl border outline-none focus:border-forest-500" required /></div>
               <div className="space-y-2">
                 <label className="text-sm font-bold text-gray-700">Omslagfoto uploaden</label>
-                <div className="border-2 border-dashed border-gray-200 rounded-xl p-8 text-center bg-gray-50 relative cursor-pointer">
+                <div className="border-2 border-dashed border-gray-200 rounded-xl p-8 text-center bg-gray-50 hover:border-forest-500 transition-colors relative cursor-pointer">
                   <input type="file" accept="image/*" onChange={e => setImageFile(e.target.files ? e.target.files[0] : null)} className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" />
                   <Upload className="mx-auto text-gray-400 mb-3" size={32} />
-                  <p className="text-sm text-gray-700 font-medium">{imageFile ? `Geselecteerd: ${imageFile.name}` : 'Klik hier om te uploaden'}</p>
+                  <p className="text-sm text-gray-700 font-medium">{imageFile ? `Geselecteerd: ${imageFile.name}` : 'Klik hier of sleep een foto om te uploaden'}</p>
                 </div>
               </div>
               <div className="space-y-2"><label className="text-sm font-bold text-gray-700">Beschrijving</label><textarea value={beschrijving} onChange={e => setBeschrijving(e.target.value)} rows={5} className="w-full p-3 rounded-xl border outline-none focus:border-forest-500 resize-none" required /></div>
@@ -247,12 +365,41 @@ export default function Admin() {
                 <div className="flex items-center gap-3 p-4 bg-forest-50/50 rounded-xl border border-forest-100/60"><input type="checkbox" id="hoofd" checked={isHoofd} onChange={e => setIsHoofd(e.target.checked)} className="w-5 h-5 accent-forest-800 rounded cursor-pointer" /><label htmlFor="hoofd" className="text-sm font-bold text-forest-900 cursor-pointer">Dit is een hoofdevenement</label></div>
                 <div className="flex items-center gap-3 p-4 bg-blue-50/50 rounded-xl border border-blue-100/60"><input type="checkbox" id="inschrijven" checked={inschrijvenMogelijk} onChange={e => setInschrijvenMogelijk(e.target.checked)} className="w-5 h-5 accent-blue-600 rounded cursor-pointer" /><label htmlFor="inschrijven" className="text-sm font-bold text-blue-900 cursor-pointer">Bezoekers moeten zich inschrijven</label></div>
               </div>
-              <button type="submit" disabled={loading} className="w-full py-4 bg-forest-800 text-white font-bold rounded-xl flex items-center justify-center gap-2 hover:bg-forest-700"><Loader2 className={loading ? "animate-spin" : "hidden"} size={20} /> <Save className={loading ? "hidden" : "block"} size={20} /> Evenement Opslaan</button>
+              <button type="submit" disabled={loading} className="w-full py-4 bg-forest-800 text-white font-bold rounded-xl flex items-center justify-center gap-2 hover:bg-forest-700 transition-all"><Loader2 className={loading ? "animate-spin" : "hidden"} size={20} /> <Save className={loading ? "hidden" : "block"} size={20} /> Evenement Opslaan</button>
             </form>
+
+            <div className="mt-16 pt-8 border-t border-gray-100">
+              <h3 className="text-xl font-black mb-6">Bestaande Evenementen Beheren</h3>
+              {bestaandeEvenementen.length === 0 ? (
+                <p className="text-gray-500 text-sm">Er zijn momenteel geen actieve evenementen.</p>
+              ) : (
+                <div className="space-y-4">
+                  {bestaandeEvenementen.map(ev => (
+                    <div key={ev.id} className="flex flex-col sm:flex-row sm:items-center justify-between p-4 bg-gray-50 rounded-xl border border-gray-100 gap-4">
+                      <div>
+                        <h4 className="font-bold text-gray-900">{ev.titel}</h4>
+                        <p className="text-xs text-gray-500 mt-1">
+                          {new Date(ev.datum).toLocaleDateString()} om {ev.tijd} • {ev.locatie}
+                        </p>
+                      </div>
+                      <button
+                        onClick={() => handleDeleteEvenement(ev)}
+                        disabled={loading}
+                        className="flex items-center gap-2 px-4 py-2 bg-white text-red-600 border border-red-100 hover:bg-red-50 hover:text-red-700 rounded-lg transition-colors disabled:opacity-50"
+                        title="Verwijder Evenement"
+                      >
+                        <Trash2 size={18} /> <span className="text-sm font-bold sm:hidden">Verwijderen</span>
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
           </div>
         )}
 
-        {/* TAB 2: GALERIJ ALBUM TOEVOEGEN */}
+        {/* TAB 2: GALERIJ ALBUMS BEHEREN */}
         {activeTab === 'galerij' && (
           <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8 animate-fade-in">
             {melding.text && <div className={`mb-6 p-4 rounded-xl text-sm font-bold ${melding.type === 'error' ? 'bg-red-50 text-red-700' : 'bg-green-50 text-green-700'}`}>{melding.text}</div>}
@@ -260,15 +407,8 @@ export default function Admin() {
             <h2 className="text-2xl font-black mb-6">Nieuw Foto-album toevoegen</h2>
             
             <form onSubmit={handleGallerySubmit} className="space-y-6">
-              <div className="space-y-2">
-                <label className="text-sm font-bold text-gray-700">Titel van het album</label>
-                <input type="text" value={galTitel} onChange={e => setGalTitel(e.target.value)} className="w-full p-3 rounded-xl border outline-none focus:border-forest-500" placeholder="Bijv. Jaarlijkse BBQ 2024" required />
-              </div>
-              
-              <div className="space-y-2">
-                <label className="text-sm font-bold text-gray-700">Korte beschrijving</label>
-                <textarea value={galBeschrijving} onChange={e => setGalBeschrijving(e.target.value)} rows={3} className="w-full p-3 rounded-xl border outline-none focus:border-forest-500" placeholder="Wat was er zo speciaal aan deze dag?" required />
-              </div>
+              <div className="space-y-2"><label className="text-sm font-bold text-gray-700">Titel van het album</label><input type="text" value={galTitel} onChange={e => setGalTitel(e.target.value)} className="w-full p-3 rounded-xl border outline-none focus:border-forest-500" placeholder="Bijv. Jaarlijkse BBQ 2024" required /></div>
+              <div className="space-y-2"><label className="text-sm font-bold text-gray-700">Korte beschrijving</label><textarea value={galBeschrijving} onChange={e => setGalBeschrijving(e.target.value)} rows={3} className="w-full p-3 rounded-xl border outline-none focus:border-forest-500" placeholder="Wat was er zo speciaal aan deze dag?" required /></div>
               
               <div className="space-y-2">
                 <label className="text-sm font-bold text-gray-700">Foto's selecteren (Je kunt meerdere tegelijk aanklikken)</label>
@@ -279,7 +419,6 @@ export default function Admin() {
                     accept="image/*" 
                     onChange={e => {
                       const newFiles = Array.from(e.target.files || []);
-                      // Voeg de nieuwe foto's toe aan de lijst die je al had
                       setGalFiles(prev => [...prev, ...newFiles]);
                     }} 
                     className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" 
@@ -287,39 +426,53 @@ export default function Admin() {
                   <Upload className="mx-auto text-gray-400 mb-2" size={32} />
                   <p className="text-sm text-gray-600 font-medium">Klik hier of sleep foto's om toe te voegen</p>
                 </div>
-
-                {/* --- FOTO PREVIEWS --- */}
                 {galFiles.length > 0 && (
                   <div className="mt-4 grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-3">
                     {galFiles.map((file, index) => (
                       <div key={index} className="relative aspect-square rounded-xl overflow-hidden shadow-sm border border-gray-200 group">
-                        <img 
-                          src={URL.createObjectURL(file)} 
-                          alt={`preview-${index}`} 
-                          className="w-full h-full object-cover" 
-                        />
-                        <button 
-                          type="button" 
-                          onClick={(e) => {
-                            e.preventDefault();
-                            setGalFiles(prev => prev.filter((_, i) => i !== index));
-                          }}
-                          className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity shadow-md hover:bg-red-600"
-                        >
+                        <img src={URL.createObjectURL(file)} alt={`preview-${index}`} className="w-full h-full object-cover" />
+                        <button type="button" onClick={(e) => { e.preventDefault(); setGalFiles(prev => prev.filter((_, i) => i !== index)); }} className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity shadow-md hover:bg-red-600">
                           <X size={14} />
                         </button>
                       </div>
                     ))}
                   </div>
                 )}
-                {/* --------------------- */}
-
               </div>
-              
-              <button type="submit" disabled={loading} className="w-full py-4 bg-forest-800 text-white font-bold rounded-xl flex items-center justify-center gap-2 hover:bg-forest-700 transition-all">
-                {loading ? <Loader2 className="animate-spin" /> : <Save size={20} />} Album Publiceren
-              </button>
+              <button type="submit" disabled={loading} className="w-full py-4 bg-forest-800 text-white font-bold rounded-xl flex items-center justify-center gap-2 hover:bg-forest-700 transition-all"><Loader2 className={loading ? "animate-spin" : "hidden"} size={20} /> <Save className={loading ? "hidden" : "block"} size={20} /> Album Publiceren</button>
             </form>
+
+            <div className="mt-16 pt-8 border-t border-gray-100">
+              <h3 className="text-xl font-black mb-6">Bestaande Albums Beheren</h3>
+              {bestaandeAlbums.length === 0 ? (
+                <p className="text-gray-500 text-sm">Er zijn nog geen albums geüpload.</p>
+              ) : (
+                <div className="space-y-4">
+                  {bestaandeAlbums.map(album => {
+                    const urls = extractUrls(album.afbeelding_urls);
+                    return (
+                      <div key={album.id} className="flex flex-col sm:flex-row sm:items-center justify-between p-4 bg-gray-50 rounded-xl border border-gray-100 gap-4">
+                        <div>
+                          <h4 className="font-bold text-gray-900">{album.titel}</h4>
+                          <p className="text-xs text-gray-500 mt-1">
+                            {urls.length} {urls.length === 1 ? 'foto' : 'foto\'s'} • Gepubliceerd op {new Date(album.created_at).toLocaleDateString()}
+                          </p>
+                        </div>
+                        <button
+                          onClick={() => handleDeleteAlbum(album)}
+                          disabled={loading}
+                          className="flex items-center gap-2 px-4 py-2 bg-white text-red-600 border border-red-100 hover:bg-red-50 hover:text-red-700 rounded-lg transition-colors disabled:opacity-50"
+                          title="Verwijder Album"
+                        >
+                          <Trash2 size={18} /> <span className="text-sm font-bold sm:hidden">Verwijderen</span>
+                        </button>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+
           </div>
         )}
 

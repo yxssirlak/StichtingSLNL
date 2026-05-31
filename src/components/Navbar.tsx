@@ -4,12 +4,11 @@ import { Menu, X, Lock } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { Session } from '@supabase/supabase-js';
 
-// Hier heb ik 'Galerij' toegevoegd aan je navigatie
+// De Activiteiten link is hier nu weggehaald!
 const navLinks = [
   { label: 'Home', href: '/' },
   { label: 'Over Ons', href: '/over-ons' },
   { label: 'Onze Gemeenschap', href: '/gemeenschap' },
-  { label: 'Activiteiten', href: '/activiteiten' },
   { label: 'Evenementen', href: '/evenementen' },
   { label: 'Galerij', href: '/galerij' },
   { label: 'Contact', href: '/contact' },
@@ -81,7 +80,7 @@ export default function Navbar() {
               </Link>
             ))}
 
-            {/* VOORWAARDELIJKE ADMIN LINK (DESKTOP) */}
+            {/* VOORWAARDELIJKE ADMIN LINK */}
             {session && (
               <Link
                 to="/admin"
