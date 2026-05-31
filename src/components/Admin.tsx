@@ -21,6 +21,8 @@ export default function Admin() {
   const [beschrijving, setBeschrijving] = useState('');
   const [isHoofd, setIsHoofd] = useState(false);
   const [inschrijvenMogelijk, setInschrijvenMogelijk] = useState(false);
+  const [betaaldEvenement, setBetaaldEvenement] = useState(false);
+  const [betaalBedrag, setBetaalBedrag] = useState('');
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [melding, setMelding] = useState({ text: '', type: '' });
   const [bestaandeEvenementen, setBestaandeEvenementen] = useState<any[]>([]);
@@ -30,6 +32,7 @@ export default function Admin() {
   const [loadingInschrijvingen, setLoadingInschrijvingen] = useState(false);
   const [zoekTerm, setZoekTerm] = useState('');
   const [filterEvenement, setFilterEvenement] = useState('');
+  const [filterPaymentStatus, setFilterPaymentStatus] = useState('');
 
   // --- STATE GALERIJ ---
   const [galTitel, setGalTitel] = useState('');
@@ -111,14 +114,24 @@ export default function Admin() {
     }
 
     const { error } = await supabase.from('evenementen').insert([{
-      titel, datum, tijd, locatie, type, beschrijving, is_hoofdevenement: isHoofd, afbeelding_url: finalImageUrl, inschrijven_mogelijk: inschrijvenMogelijk
+      titel,
+      datum,
+      tijd,
+      locatie,
+      type,
+      beschrijving,
+      is_hoofdevenement: isHoofd,
+      afbeelding_url: finalImageUrl,
+      inschrijven_mogelijk: inschrijvenMogelijk,
+      betaald_evenement: betaaldEvenement,
+      betaal_bedrag: parseFloat(betaalBedrag) || 0
     }]);
 
     if (error) {
       setMelding({ text: 'Fout bij opslaan: ' + error.message, type: 'error' });
     } else {
       setMelding({ text: 'Evenement succesvol opgeslagen!', type: 'success' });
-      setTitel(''); setDatum(''); setTijd(''); setLocatie(''); setType(''); setBeschrijving(''); setIsHoofd(false); setInschrijvenMogelijk(false); setImageFile(null);
+      setTitel(''); setDatum(''); setTijd(''); setLocatie(''); setType(''); setBeschrijving(''); setIsHoofd(false); setInschrijvenMogelijk(false); setBetaaldEvenement(false); setBetaalBedrag(''); setImageFile(null);
       fetchEvenementen(); 
     }
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -265,14 +278,17 @@ export default function Admin() {
   const gefilterdeInschrijvingen = inschrijvingen.filter(inschrijving => {
     const matchZoekterm = (inschrijving.naam?.toLowerCase().includes(zoekTerm.toLowerCase()) || false) || (inschrijving.email?.toLowerCase().includes(zoekTerm.toLowerCase()) || false);
     const matchEvenement = filterEvenement === '' || inschrijving.evenement_titel === filterEvenement;
-    return matchZoekterm && matchEvenement;
+    const matchPayment = filterPaymentStatus === '' || ((inschrijving.payment_status || '').toLowerCase() === filterPaymentStatus.toLowerCase());
+    return matchZoekterm && matchEvenement && matchPayment;
   });
 
   const exporteerNaarCSV = () => {
-    const headers = ['Datum Inschrijving', 'Naam', 'E-mailadres', 'Evenement'];
+    const headers = ['Datum Inschrijving', 'Naam', 'E-mailadres', 'Evenement', 'Betaalstatus', 'Bedrag'];
     const csvData = gefilterdeInschrijvingen.map(row => {
       const datum = row.created_at ? new Date(row.created_at).toLocaleDateString() : 'Recent';
-      return `"${datum}","${row.naam || ''}","${row.email || ''}","${row.evenement_titel || ''}"`;
+      const status = row.payment_status || '';
+      const amount = row.payment_amount ? Number(row.payment_amount).toFixed(2) : '';
+      return `"${datum}","${row.naam || ''}","${row.email || ''}","${row.evenement_titel || ''}","${status}","${amount}"`;
     });
     const csvContent = [headers.join(','), ...csvData].join('\n');
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
@@ -361,10 +377,17 @@ export default function Admin() {
                 </div>
               </div>
               <div className="space-y-2"><label className="text-sm font-bold text-gray-700">Beschrijving</label><textarea value={beschrijving} onChange={e => setBeschrijving(e.target.value)} rows={5} className="w-full p-3 rounded-xl border outline-none focus:border-forest-500 resize-none" required /></div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div className="flex items-center gap-3 p-4 bg-forest-50/50 rounded-xl border border-forest-100/60"><input type="checkbox" id="hoofd" checked={isHoofd} onChange={e => setIsHoofd(e.target.checked)} className="w-5 h-5 accent-forest-800 rounded cursor-pointer" /><label htmlFor="hoofd" className="text-sm font-bold text-forest-900 cursor-pointer">Dit is een hoofdevenement</label></div>
                 <div className="flex items-center gap-3 p-4 bg-blue-50/50 rounded-xl border border-blue-100/60"><input type="checkbox" id="inschrijven" checked={inschrijvenMogelijk} onChange={e => setInschrijvenMogelijk(e.target.checked)} className="w-5 h-5 accent-blue-600 rounded cursor-pointer" /><label htmlFor="inschrijven" className="text-sm font-bold text-blue-900 cursor-pointer">Bezoekers moeten zich inschrijven</label></div>
+                <div className="flex items-center gap-3 p-4 bg-amber-50/50 rounded-xl border border-amber-100/60"><input type="checkbox" id="betaald" checked={betaaldEvenement} onChange={e => setBetaaldEvenement(e.target.checked)} className="w-5 h-5 accent-amber-600 rounded cursor-pointer" /><label htmlFor="betaald" className="text-sm font-bold text-amber-900 cursor-pointer">Betaald evenement</label></div>
               </div>
+              {betaaldEvenement && (
+                <div className="mt-3">
+                  <label className="text-sm font-bold text-gray-700">Bedrag (EUR)</label>
+                  <input type="number" step="0.01" min="0" value={betaalBedrag} onChange={e => setBetaalBedrag(e.target.value)} className="w-full p-3 rounded-xl border outline-none focus:border-forest-500" placeholder="Bijv. 12.50" />
+                </div>
+              )}
               <button type="submit" disabled={loading} className="w-full py-4 bg-forest-800 text-white font-bold rounded-xl flex items-center justify-center gap-2 hover:bg-forest-700 transition-all"><Loader2 className={loading ? "animate-spin" : "hidden"} size={20} /> <Save className={loading ? "hidden" : "block"} size={20} /> Evenement Opslaan</button>
             </form>
 
@@ -483,17 +506,46 @@ export default function Admin() {
               <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto flex-1">
                 <div className="relative w-full sm:max-w-xs"><Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={16} /><input type="text" placeholder="Zoek naam of e-mail..." value={zoekTerm} onChange={(e) => setZoekTerm(e.target.value)} className="w-full pl-10 pr-4 py-2 rounded-lg border border-gray-200 outline-none focus:border-forest-500 text-sm" /></div>
                 <select value={filterEvenement} onChange={(e) => setFilterEvenement(e.target.value)} className="w-full sm:w-auto px-4 py-2 rounded-lg border border-gray-200 bg-white outline-none focus:border-forest-500 text-sm"><option value="">Alle evenementen</option>{uniekeEvenementen.map((ev, i) => (<option key={i} value={ev as string}>{ev as string}</option>))}</select>
+                <select value={filterPaymentStatus} onChange={(e) => setFilterPaymentStatus(e.target.value)} className="w-full sm:w-auto px-4 py-2 rounded-lg border border-gray-200 bg-white outline-none focus:border-forest-500 text-sm">
+                  <option value="">Alle statussen</option>
+                  <option value="paid">Betaald</option>
+                  <option value="pending">In afwachting</option>
+                  <option value="open">Open</option>
+                  <option value="failed">Gefaald</option>
+                  <option value="canceled">Geannuleerd</option>
+                </select>
               </div>
               <button onClick={exporteerNaarCSV} disabled={gefilterdeInschrijvingen.length === 0} className="w-full sm:w-auto flex items-center justify-center gap-2 px-4 py-2 bg-forest-800 text-white text-sm font-bold rounded-lg hover:bg-forest-700 transition-colors disabled:opacity-50"><Download size={16} /> Excel Export</button>
             </div>
             {loadingInschrijvingen ? (<div className="p-12 flex flex-col items-center justify-center text-gray-500"><Loader2 className="animate-spin mb-2" size={32} /><p>Inschrijvingen laden...</p></div>) : gefilterdeInschrijvingen.length === 0 ? (<div className="p-12 text-center text-gray-500"><Users size={48} className="mx-auto mb-4 text-gray-300" /><h3 className="text-xl font-bold text-gray-800 mb-2">Geen inschrijvingen</h3></div>) : (
               <div className="overflow-x-auto">
                 <table className="w-full text-left border-collapse">
-                  <thead><tr className="bg-white border-b border-gray-200"><th className="p-4 font-bold text-gray-600 text-sm">Datum</th><th className="p-4 font-bold text-gray-600 text-sm">Naam</th><th className="p-4 font-bold text-gray-600 text-sm">E-mailadres</th><th className="p-4 font-bold text-gray-600 text-sm">Evenement</th></tr></thead>
+                  <thead>
+                    <tr className="bg-white border-b border-gray-200">
+                      <th className="p-4 font-bold text-gray-600 text-sm">Datum</th>
+                      <th className="p-4 font-bold text-gray-600 text-sm">Naam</th>
+                      <th className="p-4 font-bold text-gray-600 text-sm">E-mailadres</th>
+                      <th className="p-4 font-bold text-gray-600 text-sm">Evenement</th>
+                      <th className="p-4 font-bold text-gray-600 text-sm">Bedrag</th>
+                      <th className="p-4 font-bold text-gray-600 text-sm">Status</th>
+                    </tr>
+                  </thead>
                   <tbody>
-                    {gefilterdeInschrijvingen.map((inschrijving, index) => (
-                      <tr key={index} className="border-b border-gray-100 hover:bg-gray-50/50 transition-colors"><td className="p-4 text-sm text-gray-500">{inschrijving.created_at ? new Date(inschrijving.created_at).toLocaleDateString() : 'Recent'}</td><td className="p-4 font-bold text-gray-900">{inschrijving.naam}</td><td className="p-4 text-sm text-gray-600"><a href={`mailto:${inschrijving.email}`} className="text-forest-600 hover:underline">{inschrijving.email}</a></td><td className="p-4"><span className="px-3 py-1 bg-blue-50 text-blue-800 text-xs font-bold rounded-full">{inschrijving.evenement_titel}</span></td></tr>
-                    ))}
+                    {gefilterdeInschrijvingen.map((inschrijving, index) => {
+                      const status = (inschrijving.payment_status || '').toLowerCase();
+                      const amount = inschrijving.payment_amount ? Number(inschrijving.payment_amount).toFixed(2) : null;
+                      const statusClass = status === 'paid' ? 'bg-green-50 text-green-800' : (status === 'pending' || status === 'open' ? 'bg-yellow-50 text-yellow-800' : 'bg-red-50 text-red-700');
+                      return (
+                        <tr key={index} className="border-b border-gray-100 hover:bg-gray-50/50 transition-colors">
+                          <td className="p-4 text-sm text-gray-500">{inschrijving.created_at ? new Date(inschrijving.created_at).toLocaleDateString() : 'Recent'}</td>
+                          <td className="p-4 font-bold text-gray-900">{inschrijving.naam}</td>
+                          <td className="p-4 text-sm text-gray-600"><a href={`mailto:${inschrijving.email}`} className="text-forest-600 hover:underline">{inschrijving.email}</a></td>
+                          <td className="p-4"><span className="px-3 py-1 bg-blue-50 text-blue-800 text-xs font-bold rounded-full">{inschrijving.evenement_titel}</span></td>
+                          <td className="p-4 text-sm text-gray-700">{amount ? `€${amount}` : '-'}</td>
+                          <td className="p-4"><span className={`${statusClass} px-3 py-1 rounded-full text-xs font-bold`}>{status || 'n.v.t.'}</span></td>
+                        </tr>
+                      );
+                    })}
                   </tbody>
                 </table>
               </div>

@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { supabase } from '../lib/supabase';
-import { Calendar, Clock, MapPin, Users, ArrowRight, Loader2, X, ArrowLeft, BookOpen, GraduationCap, Handshake } from 'lucide-react';
+import { Calendar, Clock, MapPin, ArrowRight, Loader2, X, ArrowLeft, BookOpen, GraduationCap, Handshake } from 'lucide-react';
 
 // --- HIER STAAN JE VASTE ACTIVITEITEN ---
 const activities = [
@@ -40,9 +40,46 @@ export default function Evenementen() {
   const handleRegistrationSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setRegLoading(true);
-    const { error } = await supabase.from('inschrijvingen').insert([{ evenement_titel: selectedRegEvent.titel, naam: regNaam, email: regEmail }]);
-    if (!error) { setRegSucces(true); setRegNaam(''); setRegEmail(''); } 
-    else { alert("Er ging iets mis: " + error.message); }
+    try {
+      if (selectedRegEvent?.betaald_evenement) {
+        // create placeholder payment on server
+        const resp = await fetch('/api/create-payment', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            event_title: selectedRegEvent.titel,
+            name: regNaam,
+            email: regEmail,
+            amount: selectedRegEvent.betaal_bedrag || 0
+          })
+        });
+        const data = await resp.json();
+
+        const { error } = await supabase.from('inschrijvingen').insert([{
+          evenement_titel: selectedRegEvent.titel,
+          naam: regNaam,
+          email: regEmail,
+          payment_id: data.payment_id,
+          payment_status: 'pending',
+          payment_amount: data.amount
+        }]);
+
+        if (!error) {
+          setRegSucces(true);
+          setRegNaam(''); setRegEmail('');
+          // redirect user to payment URL
+          window.location.href = data.payment_url;
+        } else {
+          alert('Er ging iets mis bij opslaan: ' + error.message);
+        }
+      } else {
+        const { error } = await supabase.from('inschrijvingen').insert([{ evenement_titel: selectedRegEvent.titel, naam: regNaam, email: regEmail }]);
+        if (!error) { setRegSucces(true); setRegNaam(''); setRegEmail(''); } 
+        else { alert("Er ging iets mis: " + error.message); }
+      }
+    } catch (err: any) {
+      alert('Er ging iets mis: ' + (err.message || JSON.stringify(err)));
+    }
     setRegLoading(false);
   };
 
@@ -109,6 +146,12 @@ export default function Evenementen() {
                   <div className="flex items-center gap-3"><Clock size={18} className="text-forest-700" /><span>{event.tijd}</span></div>
                   <div className="flex items-center gap-3"><MapPin size={18} className="text-forest-700" /><span>{event.locatie}</span></div>
                 </div>
+                {event.betaald_evenement && (
+                  <div className="mb-4">
+                    <span className="inline-block text-sm text-gray-500">Prijs</span>
+                    <div className="text-2xl font-black text-forest-800">€{Number(event.betaal_bedrag || 0).toFixed(2)}</div>
+                  </div>
+                )}
                 {event.inschrijven_mogelijk ? (
                   <button onClick={() => { setSelectedRegEvent(event); setRegSucces(false); }} className="w-full py-4 bg-forest-800 text-white font-bold rounded-xl flex items-center justify-center gap-2 hover:bg-forest-700">Inschrijven <ArrowRight size={18} /></button>
                 ) : (
@@ -126,12 +169,28 @@ export default function Evenementen() {
           <div className="bg-white rounded-2xl max-w-md w-full shadow-2xl overflow-hidden relative p-8 text-gray-900">
             <button onClick={() => setSelectedRegEvent(null)} className="absolute top-4 right-4 text-gray-400"><X size={24} /></button>
             <h3 className="text-2xl font-black mb-2">Inschrijven</h3>
-            {regSucces ? <div className="bg-green-50 text-green-800 p-6 rounded-xl text-center font-bold">🎉 Inschrijving succesvol!</div> : (
-              <form onSubmit={handleRegistrationSubmit} className="space-y-4">
+            {regSucces ? (
+              selectedRegEvent?.betaald_evenement ? (
+                <div className="bg-yellow-50 text-yellow-800 p-6 rounded-xl text-center font-bold">
+                  ✅ Inschrijving ontvangen. Maak €{Number(selectedRegEvent.betaal_bedrag || 0).toFixed(2)} over via iDEAL of bankoverschrijving naar onze rekening. Vermeld: “{selectedRegEvent.titel} – jouw naam”.
+                </div>
+              ) : (
+                <div className="bg-green-50 text-green-800 p-6 rounded-xl text-center font-bold">🎉 Inschrijving succesvol!</div>
+              )
+              ) : (
+              <>
+                {selectedRegEvent?.betaald_evenement && (
+                  <div className="mb-4 p-4 bg-yellow-50 border border-yellow-100 rounded-xl text-sm">
+                    Dit is een betaald evenement. Het bedrag is <strong>€{Number(selectedRegEvent.betaal_bedrag || 0).toFixed(2)}</strong>.
+                    Maak het bedrag over via iDEAL of bankoverschrijving naar IBAN: <strong>NL00BANK0123456789</strong> (Vul je eigen rekening in) en vermeld: <em>{selectedRegEvent.titel} - jouw naam</em>.
+                  </div>
+                )}
+                <form onSubmit={handleRegistrationSubmit} className="space-y-4">
                 <input type="text" required value={regNaam} onChange={e => setRegNaam(e.target.value)} className="w-full p-3 border rounded-xl" placeholder="Volledige naam" />
                 <input type="email" required value={regEmail} onChange={e => setRegEmail(e.target.value)} className="w-full p-3 border rounded-xl" placeholder="E-mailadres" />
                 <button type="submit" disabled={regLoading} className="w-full py-4 bg-forest-800 text-white font-bold rounded-xl">{regLoading ? <Loader2 className="animate-spin" /> : 'Bevestigen'}</button>
               </form>
+              </>
             )}
           </div>
         </div>
