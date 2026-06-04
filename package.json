@@ -4,13 +4,13 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-     "dev": "vite",
-     "build": "tsc -b && vite build",
-     "predeploy": "npm run build",
-     "deploy": "gh-pages -d dist",
-     "lint": "eslint .",
-     "preview": "vite preview"
-   },
+    "dev": "vite",
+    "build": "tsc -b && vite build",
+    "predeploy": "npm run build",
+    "deploy": "gh-pages -d dist",
+    "lint": "eslint .",
+    "preview": "vite preview"
+  },
   "dependencies": {
     "@supabase/supabase-js": "^2.57.4",
     "lucide-react": "^0.344.0",
