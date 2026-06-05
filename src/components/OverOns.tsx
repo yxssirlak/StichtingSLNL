@@ -28,12 +28,15 @@ export default function OverOns() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-16 lg:mt-24">
         <div className="grid lg:grid-cols-2 gap-16 items-center">
           <div>
-            <h2 className="text-3xl font-black text-gray-900 mb-6">Onze Geschiedenis</h2>
+            <h2 className="text-3xl font-black text-gray-900 mb-6">Over Ons</h2>
             <p className="text-lg text-gray-600 mb-4 leading-relaxed">
-              Stichting Somaliland Nederland (SLNL) is in 2012 opgericht door een groep gedreven Somalilanders. Wat begon als een klein initiatief om landgenoten bij elkaar te brengen, is uitgegroeid tot een professionele organisatie die de belangen behartigt van naar schatting 15.000 Somalilanders in Nederland.
+              Wij zijn een organisatie van en voor de Somalilandse gemeenschap. Vanuit onze gedeelde achtergrond en onze verbondenheid met zowel Somaliland als Nederland zetten wij ons in voor het versterken, ondersteunen en zichtbaar maken van onze gemeenschap.
+            </p>
+            <p className="text-lg text-gray-600 mb-4 leading-relaxed">
+              Wij geloven in de kracht van verbinding, emancipatie en gemeenschapszin. Daarom werken wij aan het creëren van kansen, het bevorderen van participatie en het versterken van de positie van Somalilanders in Nederland. Daarbij willen wij mensen inspireren, ondersteunen en samen bouwen aan een sterke en trotse gemeenschap.
             </p>
             <p className="text-lg text-gray-600 leading-relaxed">
-              We zagen de behoefte aan een centraal platform waar we niet alleen onze cultuur konden vieren, maar ook samen konden werken aan participatie in de Nederlandse samenleving en de ontwikkeling van ons thuisland.
+              Onze liefde voor zowel Somaliland als Nederland vormt de basis van onze missie. Wij willen een brug slaan tussen beide landen door wederzijds begrip, samenwerking en kennisuitwisseling te bevorderen. Zo dragen wij bij aan een toekomst waarin beide samenlevingen elkaar versterken en waarin de Somalilandse gemeenschap een herkenbare en positieve bijdrage levert aan de maatschappij.
             </p>
           </div>
           <div className="relative">

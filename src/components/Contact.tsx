@@ -46,8 +46,8 @@ export default function Contact() {
                 </div>
                 <div>
                   <div className="font-semibold text-gray-800 text-sm">E-mail</div>
-                  <a href="mailto:info@slnl.nl" className="text-forest-700 hover:underline text-sm">
-                    info@slnl.nl
+                  <a href="mailto:info@somalilandnederland.nl" className="text-forest-700 hover:underline text-sm">
+                    info@somalilandnederland.nl
                   </a>
                 </div>
               </div>

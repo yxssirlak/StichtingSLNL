@@ -121,8 +121,7 @@ export default function Evenementen() {
             {activities.map((activity, index) => {
               const Icon = activity.icon;
               return (
-                <div key={activity.title} className="group relative rounded-2xl border border-gray-100 bg-white p-6 hover:shadow-xl transition-all duration-300">
-                  <div className="absolute -bottom-4 -right-2 text-8xl font-black text-gray-50 pointer-events-none">{String(index + 1).padStart(2, '0')}</div>
+                <div key={activity.title} className="group relative rounded-2xl border border-gray-100 bg-white p-6 hover:shadow-xl hover:scale-[1.02] transition-all duration-300">
                   <div className="w-12 h-12 bg-forest-800 rounded-xl flex items-center justify-center mb-5"><Icon size={22} className="text-white" /></div>
                   <span className={`inline-block text-xs font-semibold px-2.5 py-1 rounded-full mb-3 ${activity.tagColor}`}>{activity.tag}</span>
                   <h3 className="font-bold text-gray-900 text-lg mb-3">{activity.title}</h3>
