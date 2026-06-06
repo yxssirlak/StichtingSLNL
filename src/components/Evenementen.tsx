@@ -44,8 +44,7 @@ export default function Evenementen() {
     try {
       if (selectedRegEvent?.betaald_evenement) {
         
-        // 1. Haal de sessie/anon key direct uit de supabase client
-        const { data: { session } } = await supabase.auth.getSession();
+        await supabase.auth.getSession();
         
         const { data, error: functionError } = await supabase.functions.invoke('maak-betaling', {
           body: {
