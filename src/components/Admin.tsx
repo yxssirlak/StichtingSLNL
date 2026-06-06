@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
+import Scanner from './Scanner';
 import { Save, Lock, LogOut, Loader2, Upload, Users, PlusCircle, Search, Download, ImagePlus, X, Trash2 } from 'lucide-react';
 import { Session } from '@supabase/supabase-js';
 
@@ -10,7 +11,7 @@ export default function Admin() {
   const [loginError, setLoginError] = useState('');
   const [loading, setLoading] = useState(false);
 
-  const [activeTab, setActiveTab] = useState<'toevoegen' | 'inschrijvingen' | 'galerij'>('toevoegen');
+  const [activeTab, setActiveTab] = useState<'toevoegen' | 'inschrijvingen' | 'galerij' | 'scanner'>('toevoegen');
 
   // --- STATE EVENEMENT ---
   const [titel, setTitel] = useState('');
@@ -339,6 +340,9 @@ export default function Admin() {
             <button onClick={() => setActiveTab('inschrijvingen')} className={`flex-1 min-w-[150px] flex items-center justify-center gap-2 py-3 rounded-xl font-bold transition-all ${activeTab === 'inschrijvingen' ? 'bg-forest-50 text-forest-800' : 'text-gray-500 hover:bg-gray-50'}`}>
               <Users size={18} /> Inschrijvingen
             </button>
+            <button onClick={() => setActiveTab('scanner')} className={`flex-1 min-w-[150px] flex items-center justify-center gap-2 py-3 rounded-xl font-bold transition-all ${activeTab === 'scanner' ? 'bg-forest-50 text-forest-800' : 'text-gray-500 hover:bg-gray-50'}`}>
+              <Search size={18} /> Scanner
+            </button>
           </div>
         </div>
 
@@ -496,6 +500,12 @@ export default function Admin() {
               )}
             </div>
 
+          </div>
+        )}
+
+        {activeTab === 'scanner' && (
+          <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8 animate-fade-in">
+            <Scanner />
           </div>
         )}
 
