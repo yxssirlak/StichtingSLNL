@@ -61,37 +61,36 @@ export default function Scanner() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-900 pt-20 pb-10 px-4 flex flex-col items-center animate-fade-in">
-      <div className="max-w-md w-full bg-white rounded-3xl shadow-2xl overflow-hidden">
+    <div className="min-h-screen bg-slate-900 pt-20 pb-10 px-4 flex flex-col items-center animate-fade-in">
+      <div className="max-w-md w-full bg-white rounded-[32px] shadow-2xl overflow-hidden border border-slate-800">
         
         {/* HEADER */}
-        <div className="bg-[#114232] py-6 px-6 text-center text-white">
+        <div className="bg-forest-900 py-6 px-6 text-center text-white">
           <h1 className="text-2xl font-black mb-1">Ticket Scanner</h1>
-          <p className="text-[#E2F0E9] text-sm">Scan de QR-code van de bezoeker</p>
+          <p className="text-slate-200 text-sm">Houd de QR-code rustig binnen het kader. Zorg dat de camera scherp is.</p>
         </div>
 
         {/* DE CAMERA OF DE STATUS */}
-        <div className="relative bg-black min-h-[350px] flex items-center justify-center">
-          
-          {scanStatus === 'idle' || scanStatus === 'processing' ? (
-            <div className="w-full h-full">
-              <QRScanner
-                onScan={(result) => {
-                  if (result && result.length > 0) {
-                    // Pak de ruwe tekst uit de QR code
-                    processQR(result[0].rawValue);
-                  }
-                }}
-                onError={(error) => console.log(error)}
-                styles={{ container: { width: '100%', height: '100%' } }}
-              />
-              {scanStatus === 'processing' && (
-                <div className="absolute inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center">
-                  <div className="text-white font-bold animate-pulse text-lg">Ticket controleren...</div>
-                </div>
-              )}
-            </div>
-          ) : (
+        <div className="relative bg-slate-950 min-h-[360px] flex flex-col items-center justify-between p-4">
+          <div className="w-full max-w-[420px] aspect-square rounded-3xl overflow-hidden border border-forest-700 shadow-inner">
+            {scanStatus === 'idle' || scanStatus === 'processing' ? (
+              <div className="w-full h-full bg-slate-950">
+                <QRScanner
+                  onScan={(result) => {
+                    if (result && result.length > 0) {
+                      processQR(result[0].rawValue);
+                    }
+                  }}
+                  onError={(error) => console.log(error)}
+                  styles={{ container: { width: '100%', height: '100%' } }}
+                />
+                {scanStatus === 'processing' && (
+                  <div className="absolute inset-0 bg-slate-950/70 backdrop-blur-sm flex items-center justify-center">
+                    <div className="text-white font-bold animate-pulse text-lg">Ticket controleren...</div>
+                  </div>
+                )}
+              </div>
+            ) : (
             
             /* RESULTAAT SCHERMEN */
             <div className="w-full h-full flex flex-col items-center justify-center p-8 text-center bg-white">
