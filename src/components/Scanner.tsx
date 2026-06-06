@@ -68,10 +68,10 @@ export default function Scanner() {
           <p className="text-slate-200 text-sm">Houd de QR-code rustig binnen het kader. Zorg dat de camera scherp is.</p>
         </div>
 
-        <div className="relative bg-slate-950 min-h-[360px] flex flex-col items-center justify-between p-4">
-          <div className="w-full max-w-[420px] aspect-square rounded-3xl overflow-hidden border border-forest-700 shadow-inner">
+        <div className="relative min-h-[360px] flex flex-col items-center justify-between p-4">
+          <div className="w-full max-w-[420px] aspect-square rounded-3xl overflow-hidden shadow-inner">
             {scanStatus === 'idle' || scanStatus === 'processing' ? (
-              <div className="w-full h-full bg-slate-950 relative">
+              <div className="w-full h-full relative">
                 <QRScanner
                   onScan={(result) => {
                     if (result && result.length > 0) {
