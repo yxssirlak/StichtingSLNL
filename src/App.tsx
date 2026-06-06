@@ -8,6 +8,8 @@ import Contact from './components/Contact';
 import Footer from './components/Footer';
 import Admin from './components/Admin';
 import Gallerij from './components/Gallerij';
+import Succes from './components/Succes';
+import Scanner from './components/Scanner';
 
 const HomePage = () => (
   <>
@@ -30,6 +32,8 @@ export default function App() {
             <Route path="/galerij" element={<Gallerij />} />
             <Route path="/contact" element={<Contact />} />
             <Route path="/admin" element={<Admin />} />
+            <Route path="/succes" element={<Succes />} />
+            <Route path="/scanner" element={<Scanner />} />
           </Routes>
         </main>
 
