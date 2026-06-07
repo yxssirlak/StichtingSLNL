@@ -39,12 +39,11 @@ export default function Scanner() {
         return;
       }
 
-      // 4. Alles is goed! Zet het ticket op 'gescand' in de database
-      const { error: updateError } = await supabase
-        .from('inschrijvingen')
-        .update({ is_gescand: true })
-        .eq('payment_id', result);
 
+  const { error: updateError } = await supabase
+    .from('inschrijvingen')
+    .update({ is_gescand: true })
+    .eq('id', result); 
       if (updateError) throw updateError;
 
       setScanStatus('success');
