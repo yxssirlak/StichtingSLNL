@@ -65,33 +65,33 @@ serve(async (req) => {
       // 4. MAAK QR CODE EN EMAIL TEMPLATE
       const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${paymentId}`;
       const emailHtml = `
-        <div style="font-family: Arial, sans-serif; color: #333; max-width: 600px; margin: 0 auto; border: 1px solid #E2F0E9; border-radius: 16px; overflow: hidden;">
-          <div style="background-color: #114232; padding: 30px; text-align: center;">
-            <h1 style="color: #ffffff; margin: 0;">Je ticket voor ${inschrijving.evenement_titel}</h1>
+        <div style="font-family: Arial, sans-serif; color: #333; max-width: 600px; margin: 0 auto; border: 1px solid #E2F0E9; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 10px rgba(0,0,0,0.05);">
+          <div style="background-color: #114232; padding: 40px 30px; text-align: center;">
+            <h1 style="color: #ffffff; margin: 0; font-size: 24px;">Je ticket voor ${inschrijving.evenement_titel}</h1>
           </div>
-          <div style="padding: 30px;">
-            <p style="font-size: 16px;">Beste <strong>${inschrijving.naam}</strong>,</p>
-            <p style="font-size: 16px;">We hebben je betaling succesvol ontvangen. Dit is jouw officiële toegangsbewijs. Laat de onderstaande QR-code scannen bij de ingang.</p>
+          <div style="padding: 40px 30px;">
+            <p style="font-size: 16px; margin-top: 0;">Beste <strong>${inschrijving.naam}</strong>,</p>
+            <p style="font-size: 16px; line-height: 1.5;">We hebben je betaling succesvol ontvangen. Dit is jouw officiële toegangsbewijs. Houd deze e-mail bij de hand en laat de onderstaande QR-code scannen bij de ingang.</p>
             
             <div style="text-align: center; margin: 40px 0;">
-              <img src="${qrCodeUrl}" alt="QR Code Ticket" width="200" height="200" style="border: 2px solid #114232; padding: 10px; border-radius: 12px;"/>
+              <img src="${qrCodeUrl}" alt="QR Code Ticket" width="220" height="220" style="border: 2px solid #114232; padding: 15px; border-radius: 16px; background: white;"/>
             </div>
             
-            <div style="background-color: #F8FAF9; padding: 20px; border-radius: 8px;">
-              <p style="margin: 0 0 10px 0;"><strong>Evenement:</strong> ${inschrijving.evenement_titel}</p>
-              <p style="margin: 0 0 10px 0;"><strong>Betaald bedrag:</strong> €${Number(inschrijving.payment_amount).toFixed(2)}</p>
+            <div style="background-color: #F8FAF9; padding: 20px; border-radius: 12px; border: 1px solid #E2F0E9;">
+              <p style="margin: 0 0 10px 0; font-size: 15px;"><strong>Evenement:</strong> ${inschrijving.evenement_titel}</p>
+              <p style="margin: 0 0 10px 0; font-size: 15px;"><strong>Betaald bedrag:</strong> €${Number(inschrijving.payment_amount).toFixed(2)}</p>
               <p style="margin: 0; color: #666; font-size: 14px;"><strong>Bestelnummer:</strong> ${paymentId}</p>
             </div>
             
-            <p style="font-size: 16px; margin-top: 30px;">We kijken ernaar uit je te zien!</p>
-            <p style="font-size: 16px; color: #666;">Met vriendelijke groet,<br/><strong>Stichting SLNL</strong></p>
+            <p style="font-size: 16px; margin-top: 40px; font-weight: bold;">We kijken ernaar uit je te zien!</p>
+            <p style="font-size: 16px; color: #666; line-height: 1.5;">Met vriendelijke groet,<br/><span style="color: #114232; font-weight: bold;">Stichting SLNL</span></p>
           </div>
         </div>
       `;
 
       console.log(`E-mail verzenden naar ${inschrijving.email}...`);
 
-      // 5. STUUR DE EMAIL VIA RESEND
+      // 5. STUUR DE EMAIL VIA RESEND (Nu vanaf je eigen domein!)
       const resendRes = await fetch('https://api.resend.com/emails', {
         method: 'POST',
         headers: {
@@ -99,9 +99,9 @@ serve(async (req) => {
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({
-          from: 'Stichting SLNL <onboarding@resend.dev>', // Let op: test met je eigen email (waarmee je bent ingelogd bij Resend) als je een gratis account hebt!
+          from: 'Stichting SLNL <info@somalilandnederland.nl>',
           to: inschrijving.email,
-          subject: `🎟️ Je ticket voor ${inschrijving.evenement_titel}`,
+          subject: `🎟️ Je toegangsticket voor ${inschrijving.evenement_titel}`,
           html: emailHtml
         })
       });
