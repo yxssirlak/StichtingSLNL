@@ -54,7 +54,7 @@ export default function Home() {
                 </Link>
               </div>
 
-              {/* Kernwaarden (Aangepast naar jouw wens) */}
+              {/* Kernwaarden */}
               <div className="flex gap-6 sm:gap-10 pt-8 border-t border-forest-200/60">
                 <div>
                   <div className="text-2xl sm:text-3xl font-black text-forest-800">Cultuur</div>
@@ -76,13 +76,14 @@ export default function Home() {
               <div className="absolute -top-6 -right-6 w-full h-full border-2 border-forest-200 rounded-2xl hidden lg:block" />
               
               <div className="relative rounded-2xl overflow-hidden shadow-2xl aspect-[4/3] lg:aspect-auto lg:h-[580px] bg-white">
-                {/* HIER LADEN WE JOUW NIEUWE NATUURFOTO IN */}
+                {/* Geen lazy loading hier, want dit is bovenaan de pagina! */}
                 <img src="/Nature.jpg" alt="Somaliland Natuur" className="w-full h-full object-cover" />
                 <div className="absolute inset-0 bg-gradient-to-t from-forest-900/60 via-forest-900/10 to-transparent" />
                 
                 {/* Zwevend Info Kaartje over de foto */}
                 <div className="absolute bottom-6 left-6 right-6 bg-white/95 backdrop-blur-md rounded-xl p-4 shadow-xl border border-white/20">
                   <div className="flex items-center gap-4">
+                    {/* Geen lazy loading voor het logo */}
                     <img src="/SLNL_logo.png" alt="SLNL" className="w-12 h-12 flex-shrink-0" />
                     <div>
                       <p className="font-bold text-forest-900 text-sm">Trots op onze cultuur</p>
@@ -91,7 +92,6 @@ export default function Home() {
                   </div>
                 </div>
               </div>
-              {/* De 18 Mei badge is hier netjes weggehaald! */}
             </div>
             
           </div>
@@ -107,8 +107,9 @@ export default function Home() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid lg:grid-cols-2 gap-16 items-center">
             <div className="grid grid-cols-2 gap-4">
-              <img src="https://images.pexels.com/photos/1181438/pexels-photo-1181438.jpeg" alt="Community" className="w-full h-64 object-cover rounded-2xl mt-8 shadow-lg" />
-              <img src="https://images.pexels.com/photos/3184418/pexels-photo-3184418.jpeg" alt="Samenwerking" className="w-full h-64 object-cover rounded-2xl shadow-lg" />
+              {/* LAZY LOADING TOEGEVOEGD HIER */}
+              <img src="/AL7W0409a.jpg" alt="Community" className="w-full h-64 object-cover rounded-2xl mt-8 shadow-lg" loading="lazy" />
+              <img src="/AL7W0538a.jpg" alt="Samenwerking" className="w-full h-64 object-cover rounded-2xl shadow-lg" loading="lazy" />
             </div>
             <div>
               <h2 className="text-3xl font-black text-gray-900 mb-6">Sinds 2012 de verbindende factor</h2>
@@ -165,7 +166,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* 4. UITGELICHTE BANNER: 18 MEI VIERING (Nieuwe plek onderin!) */}
+      {/* 4. UITGELICHTE BANNER: 18 MEI VIERING */}
       <section className="bg-forest-800 py-12 relative overflow-hidden">
         {/* Decoratieve achtergrond elementen */}
         <div className="absolute -right-20 -top-20 w-64 h-64 bg-forest-700 rounded-full blur-3xl opacity-50 pointer-events-none" />
@@ -174,7 +175,6 @@ export default function Home() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <div className="flex flex-col md:flex-row items-center justify-between gap-8">
             <div className="flex items-center gap-6 sm:gap-8">
-              {/* De badge is nu een mooi icoonblok geworden */}
               <div className="w-24 h-24 bg-white rounded-2xl flex flex-col items-center justify-center text-forest-800 shadow-2xl rotate-3 flex-shrink-0">
                 <span className="text-4xl font-black leading-none">18</span>
                 <span className="text-sm font-bold uppercase tracking-wider mt-1">Mei</span>
@@ -197,9 +197,10 @@ export default function Home() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <h2 className="text-3xl font-black text-gray-900 mb-10 text-center">In Beeld</h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <img src="https://images.pexels.com/photos/3889729/pexels-photo-3889729.jpeg" alt="Gallery 1" className="w-full h-80 object-cover rounded-2xl shadow-md hover:shadow-xl transition-shadow cursor-pointer" />
-            <img src="https://images.pexels.com/photos/1181438/pexels-photo-1181438.jpeg" alt="Gallery 2" className="w-full h-80 object-cover rounded-2xl shadow-md hover:shadow-xl transition-shadow cursor-pointer" />
-            <img src="https://images.pexels.com/photos/3184418/pexels-photo-3184418.jpeg" alt="Gallery 3" className="w-full h-80 object-cover rounded-2xl shadow-md hover:shadow-xl transition-shadow cursor-pointer" />
+            {/* LAZY LOADING TOEGEVOEGD HIER */}
+            <img src="/IMG_6191.jpg" alt="Evenement 1" className="w-full h-80 object-cover rounded-2xl shadow-md hover:shadow-xl transition-shadow cursor-pointer" loading="lazy" />
+            <img src="/AL7W0529a.jpg" alt="Evenement 2" className="w-full h-80 object-cover rounded-2xl shadow-md hover:shadow-xl transition-shadow cursor-pointer" loading="lazy" />
+            <img src="/IMG_6773.jpg" alt="Evenement 3" className="w-full h-80 object-cover rounded-2xl shadow-md hover:shadow-xl transition-shadow cursor-pointer" loading="lazy" />
           </div>
         </div>
       </section>

@@ -6,7 +6,7 @@ const pillars = [
     title: 'Hechte Gemeenschap',
     description:
       'Wij verbinden Somalilandse Nederlanders van alle generaties en regio\'s. Samen bouwen we een sterke gemeenschap die elkaar ondersteunt en inspireert.',
-    image: 'https://images.pexels.com/photos/3184423/pexels-photo-3184423.jpeg',
+    image: '/IMG_6302.jpg',
     color: 'bg-forest-50 border-forest-100',
     iconColor: 'bg-forest-800',
   },
@@ -15,7 +15,7 @@ const pillars = [
     title: 'Actief & Ondernemend',
     description:
       'Onze gemeenschap staat bekend om haar energie en ondernemersgeest. We stimuleren initiatieven die bijdragen aan de Nederlandse samenleving.',
-    image: 'https://images.pexels.com/photos/3184306/pexels-photo-3184306.jpeg',
+    image: '/ondernemer.png',
     color: 'bg-amber-50 border-amber-100',
     iconColor: 'bg-amber-600',
   },
@@ -24,7 +24,7 @@ const pillars = [
     title: 'Verbonden Met Thuis',
     description:
       'Ondanks de afstand blijven we verbonden met Somaliland. We ondersteunen de ontwikkeling van ons thuisland en werken aan internationale erkenning.',
-    image: 'https://images.pexels.com/photos/1450360/pexels-photo-1450360.jpeg',
+    image: '/map.jpg',
     color: 'bg-sky-50 border-sky-100',
     iconColor: 'bg-sky-700',
   },
@@ -33,7 +33,7 @@ const pillars = [
     title: 'Cultuur & Trots',
     description:
       'Onze rijke cultuur, taal en tradities worden levend gehouden. Van de Las Geel grottekeningen tot moderne Somalilandse kunst — wij zijn trots op wie we zijn.',
-    image: 'https://images.pexels.com/photos/3760529/pexels-photo-3760529.jpeg',
+    image: '/vlag.png',
     color: 'bg-rose-50 border-rose-100',
     iconColor: 'bg-somali-red',
   },
@@ -72,6 +72,7 @@ export default function Gemeenschap() {
                     src={pillar.image}
                     alt={pillar.title}
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                    loading="lazy" // <-- HIER IS HIJ TOEGEVOEGD!
                   />
                 </div>
 

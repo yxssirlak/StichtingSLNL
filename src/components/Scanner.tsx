@@ -61,15 +61,16 @@ export default function Scanner() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-900 pt-20 pb-10 px-4 flex flex-col items-center animate-fade-in">
-      <div className="max-w-md w-full bg-white rounded-[32px] shadow-2xl overflow-hidden border border-slate-800">
-        <div className="bg-forest-900 py-6 px-6 text-center text-white">
+    // bg-slate-900 is hier vervangen door bg-[#F8FAF9] (lichte achtergrond)
+    <div className="min-h-[80vh] bg-[#F8FAF9] py-10 px-4 flex flex-col items-center animate-fade-in">
+      <div className="max-w-md w-full bg-white rounded-[32px] shadow-xl overflow-hidden border border-gray-200">
+        <div className="bg-forest-800 py-6 px-6 text-center text-white">
           <h1 className="text-2xl font-black mb-1">Ticket Scanner</h1>
-          <p className="text-slate-200 text-sm">Houd de QR-code rustig binnen het kader. Zorg dat de camera scherp is.</p>
+          <p className="text-white/80 text-sm">Houd de QR-code rustig binnen het kader. Zorg dat de camera scherp is.</p>
         </div>
 
-        <div className="relative min-h-[360px] flex flex-col items-center justify-between p-4">
-          <div className="w-full max-w-[420px] aspect-square rounded-3xl overflow-hidden shadow-inner">
+        <div className="relative min-h-[360px] flex flex-col items-center justify-between p-6">
+          <div className="w-full aspect-square rounded-3xl overflow-hidden shadow-inner bg-gray-100 border-4 border-gray-50 relative">
             {scanStatus === 'idle' || scanStatus === 'processing' ? (
               <div className="w-full h-full relative">
                 <QRScanner
@@ -79,16 +80,25 @@ export default function Scanner() {
                     }
                   }}
                   onError={(error) => console.log(error)}
-                  styles={{ container: { width: '100%', height: '100%' } }}
+                  styles={{ 
+                    container: { 
+                      width: '100%', 
+                      height: '100%',
+                      backgroundColor: '#f3f4f6' // Lichte grijze camera achtergrond
+                    },
+                    video: {
+                      objectFit: 'cover' // Voorkomt lelijke randen in de video
+                    }
+                  }}
                 />
                 {scanStatus === 'processing' && (
-                  <div className="absolute inset-0 bg-slate-950/70 backdrop-blur-sm flex items-center justify-center">
-                    <div className="text-white font-bold animate-pulse text-lg">Ticket controleren...</div>
+                  <div className="absolute inset-0 bg-white/80 backdrop-blur-sm flex items-center justify-center">
+                    <div className="text-forest-800 font-bold animate-pulse text-lg">Ticket controleren...</div>
                   </div>
                 )}
               </div>
             ) : (
-              <div className="w-full h-full flex flex-col items-center justify-center p-8 text-center bg-white">
+              <div className="w-full h-full flex flex-col items-center justify-center p-4 text-center bg-white">
                 {scanStatus === 'success' && (
                   <div className="animate-bounce-in">
                     <CheckCircle size={80} className="text-green-500 mx-auto mb-4" />
@@ -112,29 +122,31 @@ export default function Scanner() {
                     <p className="text-red-600 font-bold mb-6">Ticket niet gevonden of niet betaald.</p>
                   </div>
                 )}
-
-                {bezoeker && (
-                  <div className="bg-gray-50 rounded-xl p-4 w-full text-left mb-6 border border-gray-100">
-                    <div className="flex items-center gap-3 mb-2">
-                      <User size={18} className="text-gray-400" />
-                      <span className="font-bold text-gray-900">{bezoeker.naam}</span>
-                    </div>
-                    <div className="flex items-center gap-3 text-sm text-gray-600">
-                      <CreditCard size={18} className="text-gray-400" />
-                      <span>{bezoeker.evenement_titel}</span>
-                    </div>
-                  </div>
-                )}
-
-                <button
-                  onClick={resetScanner}
-                  className="w-full py-4 bg-gray-900 text-white font-bold rounded-xl flex items-center justify-center gap-2 hover:bg-gray-800 transition"
-                >
-                  <RefreshCcw size={18} /> Scan Volgende
-                </button>
               </div>
             )}
           </div>
+
+          {bezoeker && (
+            <div className="bg-gray-50 rounded-xl p-4 w-full text-left mt-6 border border-gray-200">
+              <div className="flex items-center gap-3 mb-2">
+                <User size={18} className="text-gray-400" />
+                <span className="font-bold text-gray-900">{bezoeker.naam}</span>
+              </div>
+              <div className="flex items-center gap-3 text-sm text-gray-600">
+                <CreditCard size={18} className="text-gray-400" />
+                <span>{bezoeker.evenement_titel}</span>
+              </div>
+            </div>
+          )}
+
+          {scanStatus !== 'idle' && scanStatus !== 'processing' && (
+            <button
+              onClick={resetScanner}
+              className="w-full mt-6 py-4 bg-forest-800 text-white font-bold rounded-xl flex items-center justify-center gap-2 hover:bg-forest-700 transition"
+            >
+              <RefreshCcw size={18} /> Scan Volgende
+            </button>
+          )}
         </div>
       </div>
     </div>

@@ -8,7 +8,7 @@ export default function OverOns() {
       <div className="relative pt-32 pb-20 lg:pt-40 lg:pb-28 bg-forest-950 overflow-hidden">
         <div className="absolute inset-0">
           <img 
-            src="https://images.pexels.com/photos/3889729/pexels-photo-3889729.jpeg" 
+            src="/DSC00129a.jpg" 
             alt="Somaliland" 
             className="w-full h-full object-cover opacity-20"
           />
@@ -39,12 +39,12 @@ export default function OverOns() {
               Onze liefde voor zowel Somaliland als Nederland vormt de basis van onze missie. Wij willen een brug slaan tussen beide landen door wederzijds begrip, samenwerking en kennisuitwisseling te bevorderen. Zo dragen wij bij aan een toekomst waarin beide samenlevingen elkaar versterken en waarin de Somalilandse gemeenschap een herkenbare en positieve bijdrage levert aan de maatschappij.
             </p>
           </div>
-          <div className="relative">
+          <div className="relative flex justify-center">
             <div className="aspect-square rounded-full bg-forest-50 absolute -inset-4 lg:-inset-8 -z-10" />
             <img 
-              src="https://images.pexels.com/photos/1181438/pexels-photo-1181438.jpeg" 
+              src="/SLNL_logo.png" 
               alt="Team" 
-              className="w-full h-[400px] object-cover rounded-2xl shadow-xl"
+              className="w-full max-w-[220px] h-auto object-contain rounded-2xl shadow-xl bg-white p-4"
             />
           </div>
         </div>

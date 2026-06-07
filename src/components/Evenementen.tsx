@@ -106,6 +106,7 @@ export default function Evenementen() {
           <button onClick={() => setActiveDetailPage(null)} className="inline-flex items-center gap-2 text-[#114232] font-bold mb-8 hover:opacity-80 transition"><ArrowLeft size={20} /> Terug naar overzicht</button>
           
           <div className="rounded-3xl overflow-hidden shadow-xl mb-10 h-96 bg-gray-100">
+            {/* Geen lazy loading hier, want dit is bovenaan de detailpagina */}
             <img src={activeDetailPage.afbeelding_url} alt={activeDetailPage.titel} className="w-full h-full object-cover" />
           </div>
           
@@ -214,7 +215,11 @@ export default function Evenementen() {
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
           {events.map((event) => (
             <div key={event.titel} className="bg-white rounded-2xl overflow-hidden shadow-sm border border-gray-100 hover:shadow-xl transition-all duration-300 flex flex-col">
-              <div className="relative h-56 bg-gray-100"><img src={event.afbeelding_url} alt={event.titel} className="w-full h-full object-cover" />{getBadge(event)}</div>
+              <div className="relative h-56 bg-gray-100">
+                {/* LAZY LOADING TOEGEVOEGD HIERONDER */}
+                <img src={event.afbeelding_url} alt={event.titel} className="w-full h-full object-cover" loading="lazy" />
+                {getBadge(event)}
+              </div>
               <div className="p-6 flex flex-col flex-grow">
                 <h2 className="text-xl font-black mb-4">{event.titel}</h2>
                 <div className="space-y-2 mb-6 text-sm text-gray-600">

@@ -3,6 +3,7 @@ import { supabase } from '../lib/supabase';
 import Scanner from './Scanner';
 import { Save, Lock, LogOut, Loader2, Upload, Users, PlusCircle, Search, Download, ImagePlus, X, Trash2 } from 'lucide-react';
 import { Session } from '@supabase/supabase-js';
+import imageCompression from 'browser-image-compression'; // <-- De compressie tool toegevoegd!
 
 export default function Admin() {
   const [session, setSession] = useState<Session | null>(null);
@@ -76,7 +77,8 @@ export default function Admin() {
 
   const fetchInschrijvingen = async () => {
     setLoadingInschrijvingen(true);
-    const { data } = await supabase.from('inschrijvingen').select('*').order('created_at', { ascending: false }); 
+    const { data, error } = await supabase.from('inschrijvingen').select('*');
+    if (error) console.error("Database fout:", error);
     if (data) setInschrijvingen(data);
     setLoadingInschrijvingen(false);
   };
@@ -94,24 +96,41 @@ export default function Admin() {
     setLoading(false);
   };
 
-  // --- SUBMIT: EVENEMENT OPSLAAN ---
+  // --- SUBMIT: EVENEMENT OPSLAAN (MET COMPRESSIE) ---
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    setMelding({ text: 'Bezig met verwerken...', type: 'info' });
+    setMelding({ text: 'Bezig met verwerken en comprimeren van foto...', type: 'info' });
 
     let finalImageUrl = '';
     if (imageFile) {
-      const fileExt = imageFile.name.split('.').pop();
-      const fileName = `evenement-${Math.random()}.${fileExt}`;
-      const { error: uploadError } = await supabase.storage.from('evenement-fotos').upload(fileName, imageFile);
-      if (uploadError) {
-        setMelding({ text: 'Foto upload mislukt: ' + uploadError.message, type: 'error' });
-        window.scrollTo({ top: 0, behavior: 'smooth' });
+      try {
+        // Compressie instellingen
+        const options = {
+          maxSizeMB: 0.5,
+          maxWidthOrHeight: 1280,
+          useWebWorker: true,
+        };
+        
+        // Foto samenpersen
+        const compressedFile = await imageCompression(imageFile, options);
+        
+        const fileExt = compressedFile.name.split('.').pop();
+        const fileName = `evenement-${Math.random()}.${fileExt}`;
+        const { error: uploadError } = await supabase.storage.from('evenement-fotos').upload(fileName, compressedFile);
+        
+        if (uploadError) {
+          setMelding({ text: 'Foto upload mislukt: ' + uploadError.message, type: 'error' });
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+          setLoading(false); return;
+        }
+        const { data: { publicUrl } } = supabase.storage.from('evenement-fotos').getPublicUrl(fileName);
+        finalImageUrl = publicUrl;
+      } catch (error) {
+        console.error('Fout bij comprimeren van foto:', error);
+        setMelding({ text: 'Er ging iets mis bij het optimaliseren van de foto.', type: 'error' });
         setLoading(false); return;
       }
-      const { data: { publicUrl } } = supabase.storage.from('evenement-fotos').getPublicUrl(fileName);
-      finalImageUrl = publicUrl;
     }
 
     const { error } = await supabase.from('evenementen').insert([{
@@ -182,7 +201,7 @@ export default function Admin() {
     }
   };
 
-  // --- SUBMIT: ALBUM OPSLAAN ---
+  // --- SUBMIT: ALBUM OPSLAAN (MET COMPRESSIE) ---
   const handleGallerySubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (galFiles.length === 0) {
@@ -191,18 +210,30 @@ export default function Admin() {
       return;
     }
     setLoading(true);
-    setMelding({ text: `Album uploaden (${galFiles.length} foto's)... even geduld a.u.b.`, type: 'info' });
+    setMelding({ text: `Album optimaliseren en uploaden (${galFiles.length} foto's)... dit kan even duren.`, type: 'info' });
 
     const uploadedUrls: string[] = [];
+    const options = {
+      maxSizeMB: 0.5,
+      maxWidthOrHeight: 1280,
+      useWebWorker: true,
+    };
 
     for (const file of galFiles) {
-      const fileExt = file.name.split('.').pop();
-      const fileName = `album-${Math.random()}.${fileExt}`;
-      const { error: uploadError } = await supabase.storage.from('evenement-fotos').upload(fileName, file);
+      try {
+        // Foto samenpersen
+        const compressedFile = await imageCompression(file, options);
+        
+        const fileExt = compressedFile.name.split('.').pop();
+        const fileName = `album-${Math.random()}.${fileExt}`;
+        const { error: uploadError } = await supabase.storage.from('evenement-fotos').upload(fileName, compressedFile);
 
-      if (!uploadError) {
-        const { data: { publicUrl } } = supabase.storage.from('evenement-fotos').getPublicUrl(fileName);
-        uploadedUrls.push(publicUrl);
+        if (!uploadError) {
+          const { data: { publicUrl } } = supabase.storage.from('evenement-fotos').getPublicUrl(fileName);
+          uploadedUrls.push(publicUrl);
+        }
+      } catch (error) {
+        console.error("Fout bij comprimeren van galerij foto:", error);
       }
     }
 
@@ -215,7 +246,7 @@ export default function Admin() {
     if (error) {
       setMelding({ text: 'Fout bij opslaan: ' + error.message, type: 'error' });
     } else {
-      setMelding({ text: 'Album succesvol opgeslagen!', type: 'success' });
+      setMelding({ text: 'Album succesvol geoptimaliseerd en opgeslagen!', type: 'success' });
       setGalTitel(''); setGalBeschrijving(''); setGalFiles([]);
       fetchAlbums();
     }
