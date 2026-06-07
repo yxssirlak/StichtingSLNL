@@ -2,7 +2,6 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createMollieClient } from "npm:@mollie/api-client";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
-// Initialiseer clients. Let op: SUPABASE_SERVICE_ROLE_KEY is cruciaal om de database te mogen overschrijven!
 const mollieClient = createMollieClient({ apiKey: Deno.env.get("MOLLIE_TEST_API_KEY")! });
 const supabase = createClient(
   Deno.env.get('SUPABASE_URL')!,
@@ -12,87 +11,84 @@ const resendApiKey = Deno.env.get('RESEND_API_KEY')!;
 
 serve(async (req) => {
   try {
-    // Lees de body als ruwe tekst (robuuster voor zowel form-data als JSON/ping)
     const bodyText = await req.text();
-    console.log("Raw body ontvangen:", bodyText);
-
     const params = new URLSearchParams(bodyText);
     const paymentId = params.get('id');
 
-    // 1. PING CHECK (Voorkomt fouten bij de 'Test' knop in het Mollie Dashboard)
-    if (!paymentId) {
-      console.log("Geen payment ID gevonden. Dit is waarschijnlijk een hook.ping test van Mollie.");
-      return new Response("OK - Ping ontvangen", { status: 200 });
-    }
+    if (!paymentId) return new Response("OK - Ping ontvangen", { status: 200 });
 
-    // 2. HAAL BETALING OP BIJ MOLLIE
-    console.log(`Betaling ID ${paymentId} ophalen bij Mollie...`);
     const payment = await mollieClient.payments.get(paymentId);
-    console.log(`Status van betaling ${paymentId} is: ${payment.status}`);
 
-    // 3. ALS BETAALD: UPDATE DATABASE EN STUUR MAIL
     if (payment.status === 'paid') {
-      console.log("Betaling is succesvol! Inschrijving zoeken in database...");
-
-      // Haal de inschrijving op
-      const { data: inschrijving, error: fetchError } = await supabase
+      
+      // HAAL *ALLE* TICKETS OP VAN DEZE BETALING (dus niet .single() gebruiken)
+      const { data: inschrijvingen, error: fetchError } = await supabase
         .from('inschrijvingen')
         .select('*')
-        .eq('payment_id', paymentId)
-        .single();
+        .eq('payment_id', paymentId);
 
-      if (fetchError || !inschrijving) {
-        console.error("FOUT: Inschrijving niet gevonden in database:", fetchError);
-        // Geef toch 200 terug, anders blijft Mollie het proberen
+      if (fetchError || !inschrijvingen || inschrijvingen.length === 0) {
         return new Response("OK", { status: 200 }); 
       }
 
-      console.log(`Inschrijving gevonden voor ${inschrijving.naam}. Database updaten...`);
-
-      // Update de database naar 'paid'
+      // Zet ze ALLEMAAL op 'paid'
       const { error: updateError } = await supabase
         .from('inschrijvingen')
         .update({ payment_status: 'paid' })
         .eq('payment_id', paymentId);
 
-      if (updateError) {
-        console.error("FOUT bij het updaten van de database:", updateError);
-        return new Response("Database Error", { status: 500 });
+      if (updateError) return new Response("Database Error", { status: 500 });
+
+      const hoofdkoper = inschrijvingen[0];
+      const totaalBedrag = inschrijvingen.reduce((total, t) => total + Number(t.payment_amount), 0);
+
+      // Maak een HTML blokje voor ELK los ticket
+      let ticketsHtml = '';
+      for (const ticket of inschrijvingen) {
+        // BELANGRIJK: De QR code gebruikt nu het ticket.id (de database rij), niet meer de paymentId!
+        const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${ticket.id}`;
+        
+        ticketsHtml += `
+          <div style="margin: 0 40px 30px; background-color: #f9fbfb; border: 2px dashed #114232; border-radius: 16px; padding: 30px; text-align: center;">
+            <h2 style="margin: 0 0 5px 0; color: #114232; font-size: 22px;">${ticket.evenement_titel}</h2>
+            <p style="margin: 0 0 25px 0; color: #777; font-size: 14px; text-transform: uppercase; letter-spacing: 1px;">Toegang voor: <strong>${ticket.naam}</strong></p>
+
+            <div style="background: white; display: inline-block; padding: 15px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); margin-bottom: 25px;">
+              <img src="${qrCodeUrl}" alt="QR Code Ticket" width="200" height="200" style="display: block; border: 0;" />
+            </div>
+
+            <p style="margin: 0; color: #666; font-size: 14px;"><strong>Ticket ID:</strong> ${ticket.id}</p>
+          </div>
+        `;
       }
 
-      console.log("Database succesvol geüpdatet naar 'paid'. E-mail voorbereiden...");
-
-      // 4. MAAK QR CODE EN EMAIL TEMPLATE
-      const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${paymentId}`;
       const emailHtml = `
-        <div style="font-family: Arial, sans-serif; color: #333; max-width: 600px; margin: 0 auto; border: 1px solid #E2F0E9; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 10px rgba(0,0,0,0.05);">
-          <div style="background-color: #114232; padding: 40px 30px; text-align: center;">
-            <h1 style="color: #ffffff; margin: 0; font-size: 24px;">Je ticket voor ${inschrijving.evenement_titel}</h1>
-          </div>
-          <div style="padding: 40px 30px;">
-            <p style="font-size: 16px; margin-top: 0;">Beste <strong>${inschrijving.naam}</strong>,</p>
-            <p style="font-size: 16px; line-height: 1.5;">We hebben je betaling succesvol ontvangen. Dit is jouw officiële toegangsbewijs. Houd deze e-mail bij de hand en laat de onderstaande QR-code scannen bij de ingang.</p>
-            
-            <div style="text-align: center; margin: 40px 0;">
-              <img src="${qrCodeUrl}" alt="QR Code Ticket" width="220" height="220" style="border: 2px solid #114232; padding: 15px; border-radius: 16px; background: white;"/>
+        <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f4f7f6; padding: 40px 20px; color: #333;">
+          <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 16px; overflow: hidden; border: 1px solid #e0e6e3; box-shadow: 0 10px 25px rgba(0,0,0,0.05);">
+
+            <div style="text-align: center; padding: 40px 20px 20px; background-color: #ffffff;">
+              <img src="https://somalilandnederland.nl/SLNL_logo.png" alt="Stichting SLNL Logo" style="width: 120px; height: auto; margin-bottom: 20px;" />
+              <h1 style="color: #114232; margin: 0; font-size: 28px; font-weight: 900; letter-spacing: -0.5px;">Je Toegangstickets</h1>
             </div>
-            
-            <div style="background-color: #F8FAF9; padding: 20px; border-radius: 12px; border: 1px solid #E2F0E9;">
-              <p style="margin: 0 0 10px 0; font-size: 15px;"><strong>Evenement:</strong> ${inschrijving.evenement_titel}</p>
-              <p style="margin: 0 0 10px 0; font-size: 15px;"><strong>Betaald bedrag:</strong> €${Number(inschrijving.payment_amount).toFixed(2)}</p>
-              <p style="margin: 0; color: #666; font-size: 14px;"><strong>Bestelnummer:</strong> ${paymentId}</p>
+
+            <div style="padding: 10px 40px 20px;">
+              <p style="font-size: 16px; line-height: 1.6; margin-top: 0;">Beste <strong>${hoofdkoper.naam}</strong>,</p>
+              <p style="font-size: 16px; line-height: 1.6; color: #555;">Bedankt voor je groepsboeking! We hebben je betaling van €${totaalBedrag.toFixed(2)} ontvangen. Hieronder vind je alle persoonlijke tickets. Elke bezoeker heeft zijn eigen QR-code nodig bij de ingang.</p>
             </div>
-            
-            <p style="font-size: 16px; margin-top: 40px; font-weight: bold;">We kijken ernaar uit je te zien!</p>
-            <p style="font-size: 16px; color: #666; line-height: 1.5;">Met vriendelijke groet,<br/><span style="color: #114232; font-weight: bold;">Stichting SLNL</span></p>
+
+            ${ticketsHtml}
+
+            <div style="background-color: #114232; padding: 30px; text-align: center; color: #ffffff;">
+              <p style="margin: 0 0 10px 0; font-size: 18px; font-weight: bold;">We kijken ernaar uit jullie te zien!</p>
+              <p style="margin: 0; font-size: 14px; opacity: 0.85;">Heb je vragen? Neem contact met ons op via <a href="mailto:info@somalilandnederland.nl" style="color: #ffffff; text-decoration: underline;">info@somalilandnederland.nl</a></p>
+            </div>
+
           </div>
         </div>
       `;
 
-      console.log(`E-mail verzenden naar ${inschrijving.email}...`);
-
-      // 5. STUUR DE EMAIL VIA RESEND (Nu vanaf je eigen domein!)
-      const resendRes = await fetch('https://api.resend.com/emails', {
+      // STUUR DE EMAIL
+      await fetch('https://api.resend.com/emails', {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${resendApiKey}`,
@@ -100,21 +96,13 @@ serve(async (req) => {
         },
         body: JSON.stringify({
           from: 'Stichting SLNL <info@somalilandnederland.nl>',
-          to: inschrijving.email,
-          subject: `🎟️ Je toegangsticket voor ${inschrijving.evenement_titel}`,
+          to: hoofdkoper.email,
+          subject: `🎟️ Jouw ${inschrijvingen.length} tickets voor ${hoofdkoper.evenement_titel}`,
           html: emailHtml
         })
       });
-
-      if (!resendRes.ok) {
-         const resendError = await resendRes.text();
-         console.error("FOUT bij het versturen van e-mail via Resend:", resendError);
-      } else {
-         console.log("E-mail succesvol verzonden!");
-      }
     }
 
-    // Mollie verwacht altijd een 200 OK als het script is ontvangen
     return new Response("OK", { status: 200 });
 
   } catch (error) {

@@ -17,7 +17,7 @@ export default function Scanner() {
       const { data, error } = await supabase
         .from('inschrijvingen')
         .select('*')
-        .eq('payment_id', result)
+        .eq('id', result)
         .single();
 
       if (error || !data) {

@@ -31,13 +31,27 @@ export default function Footer() {
             </ul>
           </div>
 
-          {/* Kolom 3: Informatie */}
-          <div>
-            <h3 className="text-white font-bold tracking-wider text-sm mb-6 uppercase">Informatie</h3>
-            <ul className="space-y-3">
-              <li><Link to="#" className="text-forest-200 hover:text-white transition-colors text-sm">Privacybeleid</Link></li>
-              <li><Link to="#" className="text-forest-200 hover:text-white transition-colors text-sm">Algemene Voorwaarden</Link></li>
-            </ul>
+          {/* Kolom 3: Informatie & KvK */}
+          <div className="flex flex-col justify-between">
+            <div>
+              <h3 className="text-white font-bold tracking-wider text-sm mb-6 uppercase">Informatie</h3>
+              <ul className="space-y-3">
+                <li className="text-sm">
+                  <a href="/Algemene_Voorwaarden_Stichting_SLNL.pdf" target="_blank" rel="noopener noreferrer" className="text-forest-200 hover:text-white transition-colors">
+                    Algemene Voorwaarden
+                  </a>
+                </li>
+                <li className="text-sm">
+                  <a href="/Privacybeleid_Stichting_SLNL.pdf" target="_blank" rel="noopener noreferrer" className="text-forest-200 hover:text-white transition-colors">
+                    Privacybeleid
+                  </a>
+                </li>
+              </ul>
+            </div>
+            {/* KvK nummer strak onderaan de kolom */}
+            <div className="mt-8 text-sm text-forest-400 font-medium">
+              <p>KvK-nummer: 59399686</p>
+            </div>
           </div>
         </div>
 
@@ -47,7 +61,6 @@ export default function Footer() {
             &copy; {new Date().getFullYear()} Stichting SLNL. Alle rechten voorbehouden.
           </p>
           
-          {/* DE ADMIN KNOP (Subtiel en professioneel) */}
           <Link 
             to="/admin" 
             className="flex items-center gap-2 text-sm text-forest-400 hover:text-white transition-colors group"

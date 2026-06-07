@@ -1,8 +1,7 @@
 import { useEffect, useState } from 'react';
 import { supabase } from '../lib/supabase';
-import { Calendar, Clock, MapPin, ArrowRight, Loader2, X, ArrowLeft, BookOpen, GraduationCap, Handshake } from 'lucide-react';
+import { Calendar, Clock, MapPin, ArrowRight, Loader2, X, ArrowLeft, BookOpen, GraduationCap, Handshake, Users } from 'lucide-react';
 
-// --- HIER STAAN JE VASTE ACTIVITEITEN ---
 const activities = [
   { icon: Calendar, title: '18 Mei Viering', description: 'De nationale feestdag van Somaliland wordt elk jaar groots gevierd in Nederland. Een dag van trots, cultuur, muziek en samenzijn voor de hele gemeenschap.', tag: 'Jaarlijks', tagColor: 'bg-[#E2F0E9] text-[#114232]' },
   { icon: BookOpen, title: 'Cultuur & Educatie', description: 'Via workshops, lezingen en culturele programma\'s bewaren en delen we de rijke Somalilandse cultuur, taal en geschiedenis met nieuwe generaties.', tag: 'Doorlopend', tagColor: 'bg-amber-100 text-amber-800' },
@@ -15,8 +14,12 @@ export default function Evenementen() {
   const [loading, setLoading] = useState(true);
   const [selectedRegEvent, setSelectedRegEvent] = useState<any>(null);
   const [activeDetailPage, setActiveDetailPage] = useState<any>(null);
-  const [regNaam, setRegNaam] = useState('');
+  
+  // Nieuwe state voor meerdere tickets
+  const [ticketCount, setTicketCount] = useState(1);
+  const [regNamen, setRegNamen] = useState<string[]>(['']);
   const [regEmail, setRegEmail] = useState('');
+  
   const [regSucces, setRegSucces] = useState(false);
   const [regLoading, setRegLoading] = useState(false);
 
@@ -37,23 +40,31 @@ export default function Evenementen() {
     setLoading(false);
   }
 
-  // --- DE NIEUWE MOLLIE BETAAL LOGICA ZIT HIER ---
+  // Helper functie om het aantal namen te updaten als de dropdown verandert
+  const handleTicketCountChange = (count: number) => {
+    setTicketCount(count);
+    // Zorg dat we exact zoveel naamsvelden hebben als tickets
+    const newNamen = [...regNamen];
+    while (newNamen.length < count) newNamen.push('');
+    setRegNamen(newNamen.slice(0, count));
+  };
+
   const handleRegistrationSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setRegLoading(true);
     try {
       if (selectedRegEvent?.betaald_evenement) {
-        
         await supabase.auth.getSession();
+        
+        const totaalBedrag = (selectedRegEvent.betaal_bedrag || 0) * ticketCount;
         
         const { data, error: functionError } = await supabase.functions.invoke('maak-betaling', {
           body: {
-            amount: selectedRegEvent.betaal_bedrag || 0,
-            description: `Ticket: ${selectedRegEvent.titel}`,
+            amount: totaalBedrag,
+            description: `${ticketCount}x Ticket: ${selectedRegEvent.titel}`,
             orderId: `SLNL_${Date.now()}`,
             returnUrl: `${window.location.origin}/succes` 
           },
-          // De supabase client voegt nu automatisch de juiste header toe
           headers: {
             Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`
           }
@@ -61,28 +72,40 @@ export default function Evenementen() {
 
         if (functionError) throw functionError;
 
-        // 2. Sla alvast de inschrijving in je database op met status 'pending'
-        const { error: dbError } = await supabase.from('inschrijvingen').insert([{
+        // Maak een database regel aan voor ELKE naam in de lijst
+        const insertData = regNamen.map(naam => ({
           evenement_titel: selectedRegEvent.titel,
-          naam: regNaam,
+          naam: naam,
           email: regEmail,
-          payment_id: data.paymentId, // <-- Controleer of hier data.paymentId staat!
+          payment_id: data.paymentId,
           payment_status: 'pending',
-          payment_amount: selectedRegEvent.betaal_bedrag || 0
-        }]);
+          payment_amount: selectedRegEvent.betaal_bedrag // bedrag per los ticket
+        }));
 
+        const { error: dbError } = await supabase.from('inschrijvingen').insert(insertData);
         if (dbError) throw dbError;
 
-        // 3. Stuur de bezoeker door naar de Mollie iDEAL pagina
         if (data?.checkoutUrl) {
           window.location.href = data.checkoutUrl;
         }
 
       } else {
-        // Gratis evenement
-        const { error } = await supabase.from('inschrijvingen').insert([{ evenement_titel: selectedRegEvent.titel, naam: regNaam, email: regEmail }]);
-        if (!error) { setRegSucces(true); setRegNaam(''); setRegEmail(''); } 
-        else { alert("Er ging iets mis: " + error.message); }
+        // Gratis evenement: voeg meerdere gratis tickets toe
+        const insertData = regNamen.map(naam => ({
+          evenement_titel: selectedRegEvent.titel,
+          naam: naam,
+          email: regEmail
+        }));
+        
+        const { error } = await supabase.from('inschrijvingen').insert(insertData);
+        if (!error) { 
+          setRegSucces(true); 
+          setRegNamen(['']); 
+          setRegEmail(''); 
+          setTicketCount(1);
+        } else { 
+          alert("Er ging iets mis: " + error.message); 
+        }
       }
     } catch (err: any) {
       alert('Er ging iets mis: ' + (err.message || JSON.stringify(err)));
@@ -98,7 +121,88 @@ export default function Evenementen() {
 
   if (loading) return <div className="min-h-screen flex items-center justify-center text-[#114232]"><Loader2 className="animate-spin" size={32} /></div>;
 
-  // --- DETAILPAGINA (MEER INFO) ---
+  // --- HET MODAL FORMULIER (Zit twee keer in je code, ik zet hem hier in een variabele om hem makkelijk te hergebruiken) ---
+  const renderTicketModal = () => (
+    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+      <div className="bg-white rounded-2xl max-w-md w-full shadow-2xl overflow-y-auto max-h-[90vh] relative p-8 text-gray-900 animate-fade-in">
+        <button onClick={() => { setSelectedRegEvent(null); setRegSucces(false); setTicketCount(1); setRegNamen(['']); }} className="absolute top-4 right-4 text-gray-400 hover:text-gray-600"><X size={24} /></button>
+        
+        <h3 className="text-2xl font-black mb-2">
+          {selectedRegEvent.betaald_evenement ? 'Tickets Kopen' : 'Inschrijven'}
+        </h3>
+        
+        {regSucces ? (
+          <div className="bg-green-50 text-green-800 p-6 rounded-xl text-center font-bold">🎉 Inschrijving(en) succesvol!</div>
+        ) : (
+          <>
+            <div className="mb-6 p-4 bg-[#F8FAF9] border border-[#E2F0E9] rounded-xl text-sm">
+              Evenement: <strong className="text-[#114232] block text-base mt-1">{selectedRegEvent.titel}</strong>
+              {selectedRegEvent.betaald_evenement && (
+                <div className="mt-3 pt-3 border-t border-[#E2F0E9] flex justify-between items-center text-[#114232] font-bold">
+                  <span>Totaalbedrag ({ticketCount}x):</span>
+                  <span className="text-lg">€{Number((selectedRegEvent.betaal_bedrag || 0) * ticketCount).toFixed(2)}</span>
+                </div>
+              )}
+            </div>
+
+            {regLoading && selectedRegEvent.betaald_evenement ? (
+              <div className="text-center py-6">
+                <Loader2 className="animate-spin mx-auto text-[#114232] mb-4" size={32} />
+                <p className="font-bold text-[#114232]">Je wordt doorgestuurd naar Mollie (iDEAL)...</p>
+              </div>
+            ) : (
+              <form onSubmit={handleRegistrationSubmit} className="space-y-4">
+                
+                <div className="space-y-1">
+                  <label className="text-sm font-bold text-gray-700 flex items-center gap-2"><Users size={16}/> Aantal tickets (Max 10)</label>
+                  <select 
+                    value={ticketCount} 
+                    onChange={(e) => handleTicketCountChange(parseInt(e.target.value))}
+                    className="w-full p-4 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#114232] outline-none transition bg-white"
+                  >
+                    {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(num => (
+                      <option key={num} value={num}>{num} {num === 1 ? 'ticket' : 'tickets'}</option>
+                    ))}
+                  </select>
+                </div>
+
+                <div className="space-y-1">
+                  <label className="text-sm font-bold text-gray-700">E-mailadres (Ontvangt alle tickets)</label>
+                  <input type="email" required value={regEmail} onChange={e => setRegEmail(e.target.value)} className="w-full p-4 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#114232] outline-none transition" />
+                </div>
+
+                <div className="pt-2">
+                  <label className="text-sm font-bold text-gray-700 mb-2 block">Namen van bezoekers</label>
+                  <div className="space-y-3">
+                    {regNamen.map((naam, index) => (
+                      <input 
+                        key={index}
+                        type="text" 
+                        required 
+                        value={naam} 
+                        onChange={(e) => {
+                          const newNamen = [...regNamen];
+                          newNamen[index] = e.target.value;
+                          setRegNamen(newNamen);
+                        }} 
+                        className="w-full p-4 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#114232] outline-none transition bg-gray-50" 
+                        placeholder={`Naam bezoeker ${index + 1}`} 
+                      />
+                    ))}
+                  </div>
+                </div>
+
+                <button type="submit" disabled={regLoading} className="w-full py-4 mt-4 bg-[#114232] text-white font-bold rounded-xl hover:bg-opacity-90 transition flex items-center justify-center gap-2">
+                  {regLoading ? <Loader2 className="animate-spin" /> : selectedRegEvent.betaald_evenement ? 'Verder naar afrekenen' : 'Inschrijving Bevestigen'}
+                </button>
+              </form>
+            )}
+          </>
+        )}
+      </div>
+    </div>
+  );
+
   if (activeDetailPage) {
     return (
       <div className="min-h-screen bg-white pt-32 pb-20 text-gray-900 animate-fade-in">
@@ -106,13 +210,11 @@ export default function Evenementen() {
           <button onClick={() => setActiveDetailPage(null)} className="inline-flex items-center gap-2 text-[#114232] font-bold mb-8 hover:opacity-80 transition"><ArrowLeft size={20} /> Terug naar overzicht</button>
           
           <div className="rounded-3xl overflow-hidden shadow-xl mb-10 h-96 bg-gray-100">
-            {/* Geen lazy loading hier, want dit is bovenaan de detailpagina */}
             <img src={activeDetailPage.afbeelding_url} alt={activeDetailPage.titel} className="w-full h-full object-cover" />
           </div>
           
           <h1 className="text-4xl font-black mb-6">{activeDetailPage.titel}</h1>
 
-          {/* DE NIEUWE PRIJS & BETAAL BOX OP DE DETAILPAGINA */}
           <div className="bg-[#F8FAF9] border border-[#E2F0E9] p-6 rounded-2xl mb-10 flex flex-col sm:flex-row items-center justify-between gap-6 shadow-sm">
             <div>
               <span className="text-gray-500 text-sm font-bold uppercase tracking-wider block mb-1">Prijs per ticket</span>
@@ -121,19 +223,12 @@ export default function Evenementen() {
               </div>
             </div>
             
-            {activeDetailPage.betaald_evenement ? (
+            {activeDetailPage.betaald_evenement || activeDetailPage.inschrijven_mogelijk ? (
               <button 
                 onClick={() => setSelectedRegEvent(activeDetailPage)} 
                 className="w-full sm:w-auto px-8 py-4 bg-[#114232] text-white font-bold rounded-xl flex items-center justify-center gap-2 hover:bg-opacity-90 transition"
               >
-                Koop Ticket <ArrowRight size={18} />
-              </button>
-            ) : activeDetailPage.inschrijven_mogelijk ? (
-              <button 
-                onClick={() => setSelectedRegEvent(activeDetailPage)} 
-                className="w-full sm:w-auto px-8 py-4 bg-[#114232] text-white font-bold rounded-xl flex items-center justify-center gap-2 hover:bg-opacity-90 transition"
-              >
-                Gratis Inschrijven <ArrowRight size={18} />
+                {activeDetailPage.betaald_evenement ? 'Tickets Kopen' : 'Gratis Inschrijven'} <ArrowRight size={18} />
               </button>
             ) : (
               <div className="text-gray-500 italic font-medium px-4">Vrije inloop, inschrijven niet nodig.</div>
@@ -143,50 +238,14 @@ export default function Evenementen() {
           <div className="prose max-w-none text-lg text-gray-700 leading-relaxed whitespace-pre-line">{activeDetailPage.beschrijving}</div>
         </div>
         
-        {/* Voeg de modal ook toe aan de detailpagina zodat hij hier kan openen */}
-        {selectedRegEvent && (
-          <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-            <div className="bg-white rounded-2xl max-w-md w-full shadow-2xl overflow-hidden relative p-8 text-gray-900 animate-fade-in">
-              <button onClick={() => setSelectedRegEvent(null)} className="absolute top-4 right-4 text-gray-400 hover:text-gray-600"><X size={24} /></button>
-              
-              <h3 className="text-2xl font-black mb-2">
-                {selectedRegEvent.betaald_evenement ? 'Ticket Kopen' : 'Inschrijven'}
-              </h3>
-              
-              <div className="mb-6 p-4 bg-[#F8FAF9] border border-[#E2F0E9] rounded-xl text-sm">
-                Je reserveert voor: <strong className="text-[#114232]">{selectedRegEvent.titel}</strong>
-                {selectedRegEvent.betaald_evenement && (
-                  <div className="mt-2 text-[#114232] font-bold">Te betalen: €{Number(selectedRegEvent.betaal_bedrag || 0).toFixed(2)}</div>
-                )}
-              </div>
-
-              {regLoading && selectedRegEvent.betaald_evenement ? (
-                <div className="text-center py-6">
-                  <Loader2 className="animate-spin mx-auto text-[#114232] mb-4" size={32} />
-                  <p className="font-bold text-[#114232]">Je wordt doorgestuurd naar Mollie (iDEAL)...</p>
-                </div>
-              ) : (
-                <form onSubmit={handleRegistrationSubmit} className="space-y-4">
-                  <input type="text" required value={regNaam} onChange={e => setRegNaam(e.target.value)} className="w-full p-4 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#114232] outline-none transition" placeholder="Volledige naam" />
-                  <input type="email" required value={regEmail} onChange={e => setRegEmail(e.target.value)} className="w-full p-4 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#114232] outline-none transition" placeholder="E-mailadres" />
-                  <button type="submit" disabled={regLoading} className="w-full py-4 bg-[#114232] text-white font-bold rounded-xl hover:bg-opacity-90 transition flex items-center justify-center gap-2">
-                    {regLoading ? <Loader2 className="animate-spin" /> : selectedRegEvent.betaald_evenement ? 'Verder naar afrekenen' : 'Inschrijving Bevestigen'}
-                  </button>
-                </form>
-              )}
-            </div>
-          </div>
-        )}
+        {selectedRegEvent && renderTicketModal()}
       </div>
     );
   }
 
-  // --- OVERZICHTSPAGINA ---
   return (
     <div className="min-h-screen bg-[#F8FAF9] pt-32 pb-20 px-4 sm:px-6 lg:px-8">
       <div className="max-w-7xl mx-auto">
-        
-        {/* --- SECTIE 1: ACTIVITEITEN --- */}
         <section className="mb-24">
           <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-6 mb-16">
             <div className="max-w-2xl">
@@ -210,13 +269,11 @@ export default function Evenementen() {
           </div>
         </section>
 
-        {/* --- SECTIE 2: EVENEMENTEN --- */}
         <h2 className="text-4xl font-black text-gray-900 mb-12 text-center">Aankomende Evenementen</h2>
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
           {events.map((event) => (
             <div key={event.titel} className="bg-white rounded-2xl overflow-hidden shadow-sm border border-gray-100 hover:shadow-xl transition-all duration-300 flex flex-col">
               <div className="relative h-56 bg-gray-100">
-                {/* LAZY LOADING TOEGEVOEGD HIERONDER */}
                 <img src={event.afbeelding_url} alt={event.titel} className="w-full h-full object-cover" loading="lazy" />
                 {getBadge(event)}
               </div>
@@ -243,42 +300,7 @@ export default function Evenementen() {
         </div>
       </div>
 
-      {/* MODAL VOOR OVERZICHTSPAGINA */}
-      {selectedRegEvent && !activeDetailPage && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl max-w-md w-full shadow-2xl overflow-hidden relative p-8 text-gray-900">
-            <button onClick={() => setSelectedRegEvent(null)} className="absolute top-4 right-4 text-gray-400"><X size={24} /></button>
-            <h3 className="text-2xl font-black mb-2">Inschrijven</h3>
-            {regSucces ? (
-              <div className="bg-green-50 text-green-800 p-6 rounded-xl text-center font-bold">🎉 Inschrijving succesvol!</div>
-            ) : (
-              <>
-                <div className="mb-6 p-4 bg-[#F8FAF9] border border-[#E2F0E9] rounded-xl text-sm">
-                  Je reserveert voor: <strong className="text-[#114232]">{selectedRegEvent.titel}</strong>
-                  {selectedRegEvent.betaald_evenement && (
-                    <div className="mt-2 text-[#114232] font-bold">Te betalen: €{Number(selectedRegEvent.betaal_bedrag || 0).toFixed(2)}</div>
-                  )}
-                </div>
-                
-                {regLoading && selectedRegEvent.betaald_evenement ? (
-                  <div className="text-center py-6">
-                    <Loader2 className="animate-spin mx-auto text-[#114232] mb-4" size={32} />
-                    <p className="font-bold text-[#114232]">Je wordt doorgestuurd naar Mollie...</p>
-                  </div>
-                ) : (
-                  <form onSubmit={handleRegistrationSubmit} className="space-y-4">
-                    <input type="text" required value={regNaam} onChange={e => setRegNaam(e.target.value)} className="w-full p-4 border rounded-xl" placeholder="Volledige naam" />
-                    <input type="email" required value={regEmail} onChange={e => setRegEmail(e.target.value)} className="w-full p-4 border rounded-xl" placeholder="E-mailadres" />
-                    <button type="submit" disabled={regLoading} className="w-full py-4 bg-[#114232] text-white font-bold rounded-xl flex items-center justify-center gap-2">
-                      {regLoading ? <Loader2 className="animate-spin" /> : selectedRegEvent.betaald_evenement ? 'Verder naar afrekenen' : 'Bevestigen'}
-                    </button>
-                  </form>
-                )}
-              </>
-            )}
-          </div>
-        </div>
-      )}
+      {selectedRegEvent && !activeDetailPage && renderTicketModal()}
     </div>
   );
 }
