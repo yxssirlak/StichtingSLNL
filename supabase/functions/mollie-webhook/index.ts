@@ -2,7 +2,7 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createMollieClient } from "npm:@mollie/api-client";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
-const mollieClient = createMollieClient({ apiKey: Deno.env.get("MOLLIE_TEST_API_KEY")! });
+const mollieClient = createMollieClient({ apiKey: Deno.env.get("MOLLIE_LIVE_API_KEY")! });
 const supabase = createClient(
   Deno.env.get('SUPABASE_URL')!,
   Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
