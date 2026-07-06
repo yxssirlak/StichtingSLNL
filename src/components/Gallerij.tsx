@@ -1,11 +1,14 @@
 import { useEffect, useState } from 'react';
 import { supabase } from '../lib/supabase';
-import { Download, Loader2, Image as ImageIcon } from 'lucide-react';
+import { Download, Loader2, Image as ImageIcon, CheckCircle2 } from 'lucide-react';
 
 export default function Gallerij() {
   const [albums, setAlbums] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [downloadingAlbum, setDownloadingAlbum] = useState<string | null>(null);
+  
+  // Nieuwe state om geselecteerde foto's bij te houden (op basis van URL)
+  const [selectedPhotos, setSelectedPhotos] = useState<string[]>([]);
 
   useEffect(() => {
     fetchAlbums();
@@ -20,25 +23,33 @@ export default function Gallerij() {
     setLoading(false);
   }
 
-  const downloadHeleAlbum = async (album: any) => {
+  // Functie om selectie in of uit te schakelen
+  const togglePhotoSelection = (url: string) => {
+    setSelectedPhotos(prev => 
+      prev.includes(url) 
+        ? prev.filter(photoUrl => photoUrl !== url) 
+        : [...prev, url]
+    );
+  };
+
+  // Geüpdatete download functie die zowel hele albums als selecties aankan
+  const downloadFotos = async (album: any, urlsToDownload: string[]) => {
     setDownloadingAlbum(album.id);
     
-    // Veilige check om de array goed in te laden
-    let urls = [];
-    if (Array.isArray(album.afbeelding_urls)) {
-      urls = album.afbeelding_urls;
-    } else if (typeof album.afbeelding_urls === 'string') {
-      try { urls = JSON.parse(album.afbeelding_urls); } catch (e) {}
-    }
-    
-    for (let i = 0; i < urls.length; i++) {
+    for (let i = 0; i < urlsToDownload.length; i++) {
       try {
-        const response = await fetch(urls[i]);
+        const response = await fetch(urlsToDownload[i]);
         const blob = await response.blob();
         const blobUrl = window.URL.createObjectURL(blob);
         const link = document.createElement('a');
         link.href = blobUrl;
-        link.download = `${album.titel.replace(/\s+/g, '-')}-foto-${i + 1}.jpg`;
+        
+        // Dynamische bestandsnaam afhankelijk van of het een selectie is
+        const bestandsNaam = urlsToDownload.length === JSON.parse(album.afbeelding_urls || "[]").length 
+          ? `${album.titel.replace(/\s+/g, '-')}-foto-${i + 1}.jpg`
+          : `${album.titel.replace(/\s+/g, '-')}-selectie-${i + 1}.jpg`;
+          
+        link.download = bestandsNaam;
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
@@ -48,7 +59,9 @@ export default function Gallerij() {
         console.error("Fout bij downloaden foto:", err);
       }
     }
+    
     setDownloadingAlbum(null);
+    setSelectedPhotos([]); // Reset de selectie na succesvol downloaden
   };
 
   if (loading) return ( <div className="min-h-screen flex items-center justify-center text-forest-800"><Loader2 className="animate-spin" size={32} /></div> );
@@ -67,13 +80,16 @@ export default function Gallerij() {
         ) : (
           <div className="space-y-12">
             {albums.map((album) => {
-              // Zorgvuldige check voor weergave
               let urls = [];
               if (Array.isArray(album.afbeelding_urls)) {
                 urls = album.afbeelding_urls;
               } else if (typeof album.afbeelding_urls === 'string') {
                 try { urls = JSON.parse(album.afbeelding_urls); } catch (e) {}
               }
+              
+              // Bepaal welke foto's van dit specifieke album zijn geselecteerd
+              const albumSelectedUrls = urls.filter((u: string) => selectedPhotos.includes(u));
+              const hasSelection = albumSelectedUrls.length > 0;
               
               return (
                 <div key={album.id} className="bg-white rounded-3xl shadow-sm border border-gray-100 p-6 md:p-8">
@@ -84,26 +100,50 @@ export default function Gallerij() {
                     </div>
                     
                     <button 
-                      onClick={() => downloadHeleAlbum(album)}
+                      // Pass ofwel de geselecteerde URL's, ofwel alle URL's door
+                      onClick={() => downloadFotos(album, hasSelection ? albumSelectedUrls : urls)}
                       disabled={downloadingAlbum === album.id || urls.length === 0}
-                      className="flex-shrink-0 flex items-center justify-center gap-2 px-6 py-3 bg-forest-50 text-forest-800 font-bold rounded-xl hover:bg-forest-100 transition-colors disabled:opacity-50"
+                      className="flex-shrink-0 flex items-center justify-center gap-2 px-6 py-3 bg-forest-50 text-forest-800 font-bold rounded-xl hover:bg-forest-100 transition-colors disabled:opacity-50 min-w-[220px]"
                     >
                       {downloadingAlbum === album.id ? <Loader2 className="animate-spin" size={18} /> : <Download size={18} />}
-                      {downloadingAlbum === album.id ? 'Bezig met downloaden...' : 'Download Album'}
+                      {downloadingAlbum === album.id 
+                        ? 'Bezig met downloaden...' 
+                        : hasSelection 
+                          ? `Download Selectie (${albumSelectedUrls.length})` 
+                          : 'Download Hele Album'}
                     </button>
                   </div>
 
                   <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                    {urls.map((url: string, index: number) => (
-                      <div key={index} className="aspect-square rounded-2xl overflow-hidden bg-gray-100 group cursor-pointer">
-                        <img 
-                          src={url} 
-                          alt={`Foto ${index + 1}`} 
-                          className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-                          loading="lazy" 
-                        />
-                      </div>
-                    ))}
+                    {urls.map((url: string, index: number) => {
+                      const isSelected = selectedPhotos.includes(url);
+                      
+                      return (
+                        <div 
+                          key={index} 
+                          onClick={() => togglePhotoSelection(url)}
+                          className={`relative aspect-square rounded-2xl overflow-hidden bg-gray-100 group cursor-pointer transition-all duration-300 ${
+                            isSelected 
+                              ? 'ring-4 ring-forest-500 shadow-[0_0_15px_rgba(34,197,94,0.4)] scale-[0.98]' 
+                              : 'hover:opacity-90'
+                          }`}
+                        >
+                          <img 
+                            src={url} 
+                            alt={`Foto ${index + 1}`} 
+                            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                            loading="lazy" 
+                          />
+                          
+                          {/* Moderne glassmorphism overlay en vinkje voor geselecteerde status */}
+                          {isSelected && (
+                            <div className="absolute inset-0 bg-forest-900/20 backdrop-blur-[2px] flex items-center justify-center transition-all duration-300">
+                              <CheckCircle2 className="text-white drop-shadow-md" size={40} strokeWidth={2.5} />
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
                   </div>
                 </div>
               );
