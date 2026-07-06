@@ -1,13 +1,11 @@
 import { useEffect, useState } from 'react';
 import { supabase } from '../lib/supabase';
-import { Download, Loader2, Image as ImageIcon, CheckCircle2 } from 'lucide-react';
+import { Download, Loader2, Image as ImageIcon, CheckCircle2, X } from 'lucide-react';
 
 export default function Gallerij() {
   const [albums, setAlbums] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const [downloadingAlbum, setDownloadingAlbum] = useState<string | null>(null);
-  
-  // Nieuwe state om geselecteerde foto's bij te houden (op basis van URL)
+  const [isDownloading, setIsDownloading] = useState(false);
   const [selectedPhotos, setSelectedPhotos] = useState<string[]>([]);
 
   useEffect(() => {
@@ -23,7 +21,7 @@ export default function Gallerij() {
     setLoading(false);
   }
 
-  // Functie om selectie in of uit te schakelen
+  // Functie om enkele foto selectie in/uit te schakelen
   const togglePhotoSelection = (url: string) => {
     setSelectedPhotos(prev => 
       prev.includes(url) 
@@ -32,24 +30,45 @@ export default function Gallerij() {
     );
   };
 
-  // Geüpdatete download functie die zowel hele albums als selecties aankan
-  const downloadFotos = async (album: any, urlsToDownload: string[]) => {
-    setDownloadingAlbum(album.id);
-    
-    for (let i = 0; i < urlsToDownload.length; i++) {
+  // Functie om alle foto's van één album in één keer te selecteren
+  const selectAllFromAlbum = (albumUrls: string[]) => {
+    setSelectedPhotos(prev => {
+      const newSelection = [...prev];
+      albumUrls.forEach(url => {
+        if (!newSelection.includes(url)) newSelection.push(url);
+      });
+      return newSelection;
+    });
+  };
+
+  // De download functie voor de zwevende knop
+  const handleDownload = async () => {
+    if (selectedPhotos.length === 0) return;
+    setIsDownloading(true);
+
+    // Zoek de titel van het album op basis van de eerste geselecteerde foto
+    let albumTitle = "SLNL-Evenement";
+    for (const album of albums) {
+      let urls = [];
       try {
-        const response = await fetch(urlsToDownload[i]);
+        urls = typeof album.afbeelding_urls === 'string' ? JSON.parse(album.afbeelding_urls || "[]") : (album.afbeelding_urls || []);
+      } catch (e) {}
+      
+      if (urls.includes(selectedPhotos[0])) {
+        albumTitle = album.titel.replace(/\s+/g, '-');
+        break;
+      }
+    }
+
+    for (let i = 0; i < selectedPhotos.length; i++) {
+      try {
+        const response = await fetch(selectedPhotos[i]);
         const blob = await response.blob();
         const blobUrl = window.URL.createObjectURL(blob);
         const link = document.createElement('a');
         link.href = blobUrl;
         
-        // Dynamische bestandsnaam afhankelijk van of het een selectie is
-        const bestandsNaam = urlsToDownload.length === JSON.parse(album.afbeelding_urls || "[]").length 
-          ? `${album.titel.replace(/\s+/g, '-')}-foto-${i + 1}.jpg`
-          : `${album.titel.replace(/\s+/g, '-')}-selectie-${i + 1}.jpg`;
-          
-        link.download = bestandsNaam;
+        link.download = `${albumTitle}-selectie-${i + 1}.jpg`;
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
@@ -60,14 +79,14 @@ export default function Gallerij() {
       }
     }
     
-    setDownloadingAlbum(null);
+    setIsDownloading(false);
     setSelectedPhotos([]); // Reset de selectie na succesvol downloaden
   };
 
-  if (loading) return ( <div className="min-h-screen flex items-center justify-center text-forest-800"><Loader2 className="animate-spin" size={32} /></div> );
+  if (loading) return ( <div className="min-h-screen flex items-center justify-center text-[#114232]"><Loader2 className="animate-spin" size={32} /></div> );
 
   return (
-    <div className="min-h-screen bg-[#F8FAF9] pt-32 pb-20 px-4">
+    <div className="min-h-screen bg-[#F8FAF9] pt-32 pb-32 px-4 relative">
       <div className="max-w-5xl mx-auto">
         <h1 className="text-4xl font-black text-center mb-4 text-gray-900">Terugblik</h1>
         <p className="text-center text-gray-600 mb-12">Bekijk onze mooiste herinneringen van de afgelopen evenementen.</p>
@@ -87,33 +106,29 @@ export default function Gallerij() {
                 try { urls = JSON.parse(album.afbeelding_urls); } catch (e) {}
               }
               
-              // Bepaal welke foto's van dit specifieke album zijn geselecteerd
-              const albumSelectedUrls = urls.filter((u: string) => selectedPhotos.includes(u));
-              const hasSelection = albumSelectedUrls.length > 0;
-              
               return (
                 <div key={album.id} className="bg-white rounded-3xl shadow-sm border border-gray-100 p-6 md:p-8">
-                  <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
-                    <div>
-                      <h2 className="text-2xl font-black text-gray-900 mb-2">{album.titel}</h2>
-                      <p className="text-gray-600">{album.beschrijving}</p>
-                    </div>
+                  
+                  {/* Vernieuwde header met instructies in plaats van de download knop */}
+                  <div className="mb-8">
+                    <h2 className="text-2xl font-black text-gray-900 mb-2">{album.titel}</h2>
+                    <p className="text-gray-600 mb-4">{album.beschrijving}</p>
                     
-                    <button 
-                      // Pass ofwel de geselecteerde URL's, ofwel alle URL's door
-                      onClick={() => downloadFotos(album, hasSelection ? albumSelectedUrls : urls)}
-                      disabled={downloadingAlbum === album.id || urls.length === 0}
-                      className="flex-shrink-0 flex items-center justify-center gap-2 px-6 py-3 bg-forest-50 text-forest-800 font-bold rounded-xl hover:bg-forest-100 transition-colors disabled:opacity-50 min-w-[220px]"
-                    >
-                      {downloadingAlbum === album.id ? <Loader2 className="animate-spin" size={18} /> : <Download size={18} />}
-                      {downloadingAlbum === album.id 
-                        ? 'Bezig met downloaden...' 
-                        : hasSelection 
-                          ? `Download Selectie (${albumSelectedUrls.length})` 
-                          : 'Download Hele Album'}
-                    </button>
+                    <div className="flex flex-wrap items-center gap-3">
+                      <div className="inline-flex items-center gap-2 bg-[#114232]/10 text-[#114232] px-4 py-2 rounded-xl text-sm font-bold border border-[#114232]/20">
+                        <CheckCircle2 size={18} />
+                        Selecteer de foto's die je wilt downloaden
+                      </div>
+                      <button 
+                        onClick={() => selectAllFromAlbum(urls)}
+                        className="text-sm font-medium text-gray-500 hover:text-[#114232] transition-colors underline underline-offset-2"
+                      >
+                        Of selecteer hele album
+                      </button>
+                    </div>
                   </div>
 
+                  {/* Foto grid */}
                   <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
                     {urls.map((url: string, index: number) => {
                       const isSelected = selectedPhotos.includes(url);
@@ -124,7 +139,7 @@ export default function Gallerij() {
                           onClick={() => togglePhotoSelection(url)}
                           className={`relative aspect-square rounded-2xl overflow-hidden bg-gray-100 group cursor-pointer transition-all duration-300 ${
                             isSelected 
-                              ? 'ring-4 ring-forest-500 shadow-[0_0_15px_rgba(34,197,94,0.4)] scale-[0.98]' 
+                              ? 'ring-4 ring-[#114232] shadow-[0_0_15px_rgba(17,66,50,0.3)] scale-[0.98]' 
                               : 'hover:opacity-90'
                           }`}
                         >
@@ -135,9 +150,8 @@ export default function Gallerij() {
                             loading="lazy" 
                           />
                           
-                          {/* Moderne glassmorphism overlay en vinkje voor geselecteerde status */}
                           {isSelected && (
-                            <div className="absolute inset-0 bg-forest-900/20 backdrop-blur-[2px] flex items-center justify-center transition-all duration-300">
+                            <div className="absolute inset-0 bg-[#114232]/20 backdrop-blur-[2px] flex items-center justify-center transition-all duration-300">
                               <CheckCircle2 className="text-white drop-shadow-md" size={40} strokeWidth={2.5} />
                             </div>
                           )}
@@ -151,6 +165,30 @@ export default function Gallerij() {
           </div>
         )}
       </div>
+
+      {/* ZWEVENDE DOWNLOAD KNOP (Verschijnt alleen als er iets is geselecteerd) */}
+      {selectedPhotos.length > 0 && (
+        <div className="fixed bottom-6 right-6 md:bottom-10 md:right-10 z-50">
+          <div className="bg-white rounded-full shadow-[0_10px_40px_-10px_rgba(0,0,0,0.3)] border border-gray-100 p-2 flex items-center gap-2 transform transition-all">
+            <button
+              onClick={() => setSelectedPhotos([])}
+              className="p-3 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-full transition-colors"
+              title="Selectie wissen"
+            >
+              <X size={20} />
+            </button>
+            
+            <button
+              onClick={handleDownload}
+              disabled={isDownloading}
+              className="flex items-center gap-2 px-6 py-3 bg-[#114232] text-white font-bold rounded-full hover:bg-[#0a2e22] transition-colors disabled:opacity-70 min-w-[200px] justify-center shadow-md"
+            >
+              {isDownloading ? <Loader2 className="animate-spin" size={20} /> : <Download size={20} />}
+              {isDownloading ? 'Bezig...' : `Download ${selectedPhotos.length} ${selectedPhotos.length === 1 ? 'foto' : 'foto\'s'}`}
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
