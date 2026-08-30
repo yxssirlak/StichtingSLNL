@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Menu, X, Lock } from 'lucide-react';
+import { Menu, X, Lock, Globe } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { Session } from '@supabase/supabase-js';
+import { useTranslation } from 'react-i18next';
 
 // De Activiteiten link is hier nu weggehaald!
 const navLinks = [
@@ -19,6 +20,19 @@ export default function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const location = useLocation();
   const [session, setSession] = useState<Session | null>(null);
+
+  // --- NIEUW: i18n Taal Logica ---
+  const { i18n } = useTranslation();
+  const [isLangMenuOpen, setIsLangMenuOpen] = useState(false);
+
+  const veranderTaal = (taalcode: string) => {
+    i18n.changeLanguage(taalcode);
+    setIsLangMenuOpen(false);
+    setIsOpen(false); // Sluit ook mobiel menu indien open
+  };
+
+  const huidigeTaal = i18n.language ? i18n.language.toUpperCase().substring(0, 2) : 'NL';
+  // ---------------------------------
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 20);
@@ -69,6 +83,7 @@ export default function Navbar() {
                   location.pathname === link.href ? 'text-forest-800' : 'text-gray-600 hover:text-forest-800'
                 }`}
               >
+                {/* Let op: Hier kun je later t(link.label) van maken voor vertalingen */}
                 <span className="relative z-10 whitespace-nowrap">{link.label}</span>
                 <span 
                   className={`absolute inset-0 bg-forest-50 rounded-xl transition-all duration-300 ease-out origin-center ${
@@ -102,8 +117,31 @@ export default function Navbar() {
             )}
           </nav>
 
-          {/* RECHTERKANT: Knop */}
+          {/* RECHTERKANT: Knop & Taal */}
           <div className="flex-1 hidden lg:flex items-center justify-end gap-4 xl:gap-6 z-20">
+            
+            {/* NIEUW: TAAL SELECTIE DROPDOWN DESKTOP */}
+            <div className="relative">
+              <button 
+                onClick={() => setIsLangMenuOpen(!isLangMenuOpen)}
+                className="flex items-center gap-2 px-3 py-2 rounded-xl text-gray-600 hover:text-forest-800 hover:bg-forest-50 transition-colors font-bold text-sm"
+              >
+                <Globe size={18} />
+                {huidigeTaal}
+              </button>
+
+              {isLangMenuOpen && (
+                <div className="absolute right-0 mt-2 w-32 bg-white border border-gray-100 rounded-2xl shadow-lg overflow-hidden z-50">
+                  <div className="flex flex-col py-1">
+                    <button onClick={() => veranderTaal('nl')} className={`px-4 py-2 text-left text-sm font-bold hover:bg-forest-50 transition-colors ${huidigeTaal === 'NL' ? 'text-forest-800' : 'text-gray-600'}`}>Nederlands</button>
+                    <button onClick={() => veranderTaal('en')} className={`px-4 py-2 text-left text-sm font-bold hover:bg-forest-50 transition-colors ${huidigeTaal === 'EN' ? 'text-forest-800' : 'text-gray-600'}`}>English</button>
+                    <button onClick={() => veranderTaal('so')} className={`px-4 py-2 text-left text-sm font-bold hover:bg-forest-50 transition-colors ${huidigeTaal === 'SO' ? 'text-forest-800' : 'text-gray-600'}`}>Soomaali</button>
+                  </div>
+                </div>
+              )}
+            </div>
+            {/* EINDE TAAL SELECTIE */}
+
             <Link
               to="/evenementen"
               className="px-6 py-2.5 bg-forest-800 text-white text-sm font-semibold rounded-xl hover:bg-forest-700 active:scale-95 transition-all duration-200 shadow-md shadow-forest-800/20 whitespace-nowrap"
@@ -150,6 +188,15 @@ export default function Navbar() {
               <Lock size={16} /> Admin Dashboard
             </Link>
           )}
+
+          {/* NIEUW: TAAL SELECTIE MOBIEL */}
+          <div className="flex justify-around items-center pt-4 mt-2 border-t border-gray-100">
+            <button onClick={() => veranderTaal('nl')} className={`px-4 py-2 rounded-xl text-sm font-bold ${huidigeTaal === 'NL' ? 'bg-forest-50 text-forest-800' : 'text-gray-500'}`}>NL</button>
+            <button onClick={() => veranderTaal('en')} className={`px-4 py-2 rounded-xl text-sm font-bold ${huidigeTaal === 'EN' ? 'bg-forest-50 text-forest-800' : 'text-gray-500'}`}>EN</button>
+            <button onClick={() => veranderTaal('so')} className={`px-4 py-2 rounded-xl text-sm font-bold ${huidigeTaal === 'SO' ? 'bg-forest-50 text-forest-800' : 'text-gray-500'}`}>SO</button>
+          </div>
+          {/* EINDE TAAL MOBIEL */}
+
         </div>
       </div>
     </header>
