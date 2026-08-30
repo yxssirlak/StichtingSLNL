@@ -29,22 +29,26 @@ export default function Navbar() {
   const [huidigeTaal] = useState(getActiveLanguage());
 
   const veranderTaal = (taalcode: string) => {
-    const date = new Date();
-    date.setTime(date.getTime() + (365 * 24 * 60 * 60 * 1000));
-    const expires = "expires=" + date.toUTCString();
-
+    const host = window.location.hostname;
+    
     if (taalcode === 'nl') {
-      // Wis de cookie agressief op alle mogelijke domein-niveaus (met en zonder punt)
+      // Gooi de cookie op letterlijk elke mogelijke manier weg
       document.cookie = "googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
-      document.cookie = `googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; domain=${window.location.hostname}; path=/;`;
-      document.cookie = `googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; domain=.${window.location.hostname}; path=/;`;
+      document.cookie = `googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; domain=${host}; path=/;`;
+      document.cookie = `googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; domain=.${host}; path=/;`;
+      
+      // Maak ook de browser cache schoon voor de zekerheid
+      window.localStorage.removeItem('googtrans');
+      window.sessionStorage.removeItem('googtrans');
     } else {
-      // Stel de cookie in mét de verloopdatum
-      document.cookie = `googtrans=/nl/${taalcode}; ${expires}; path=/`;
-      document.cookie = `googtrans=/nl/${taalcode}; ${expires}; domain=.${window.location.hostname}; path=/`;
+      // Stel de cookie in voor een jaar
+      const expires = new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toUTCString();
+      document.cookie = `googtrans=/nl/${taalcode}; expires=${expires}; path=/;`;
+      document.cookie = `googtrans=/nl/${taalcode}; expires=${expires}; domain=${host}; path=/;`;
+      document.cookie = `googtrans=/nl/${taalcode}; expires=${expires}; domain=.${host}; path=/;`;
     }
     
-    // Herlaad de pagina om de vertaling direct toe te passen
+    // Herlaad de pagina
     window.location.reload();
   };
 
