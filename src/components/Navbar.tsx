@@ -3,9 +3,7 @@ import { Link, useLocation } from 'react-router-dom';
 import { Menu, X, Lock, Globe } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { Session } from '@supabase/supabase-js';
-import { useTranslation } from 'react-i18next';
 
-// De Activiteiten link is hier nu weggehaald!
 const navLinks = [
   { label: 'Home', href: '/' },
   { label: 'Over Ons', href: '/over-ons' },
@@ -21,18 +19,27 @@ export default function Navbar() {
   const location = useLocation();
   const [session, setSession] = useState<Session | null>(null);
 
-  // --- NIEUW: i18n Taal Logica ---
-  const { i18n } = useTranslation();
-  const [isLangMenuOpen, setIsLangMenuOpen] = useState(false);
-
-  const veranderTaal = (taalcode: string) => {
-    i18n.changeLanguage(taalcode);
-    setIsLangMenuOpen(false);
-    setIsOpen(false); // Sluit ook mobiel menu indien open
+  // --- NIEUW: Bulletproof Google Translate Logica via Cookies ---
+  const getActiveLanguage = () => {
+    const match = document.cookie.match(/googtrans=\/nl\/([a-z]{2})/);
+    return match ? match[1].toUpperCase() : 'NL';
   };
 
-  const huidigeTaal = i18n.language ? i18n.language.toUpperCase().substring(0, 2) : 'NL';
-  // ---------------------------------
+  const [isLangMenuOpen, setIsLangMenuOpen] = useState(false);
+  const [huidigeTaal, setHuidigeTaal] = useState(getActiveLanguage());
+
+  const veranderTaal = (taalcode: string) => {
+    // Simpele, betrouwbare cookie (werkt ook lokaal perfect)
+    if (taalcode === 'nl') {
+      document.cookie = "googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+    } else {
+      document.cookie = `googtrans=/nl/${taalcode}; path=/`;
+    }
+    
+    // Herlaad de pagina zodat het Google script de nieuwe cookie leest
+    window.location.reload();
+  };
+  // ---------------------------------------------
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 20);
@@ -83,7 +90,6 @@ export default function Navbar() {
                   location.pathname === link.href ? 'text-forest-800' : 'text-gray-600 hover:text-forest-800'
                 }`}
               >
-                {/* Let op: Hier kun je later t(link.label) van maken voor vertalingen */}
                 <span className="relative z-10 whitespace-nowrap">{link.label}</span>
                 <span 
                   className={`absolute inset-0 bg-forest-50 rounded-xl transition-all duration-300 ease-out origin-center ${
@@ -95,7 +101,6 @@ export default function Navbar() {
               </Link>
             ))}
 
-            {/* VOORWAARDELIJKE ADMIN LINK */}
             {session && (
               <Link
                 to="/admin"
@@ -117,14 +122,17 @@ export default function Navbar() {
             )}
           </nav>
 
-          {/* RECHTERKANT: Knop & Taal */}
+          {/* RECHTERKANT: Custom Taal Knop & Doe Mee */}
           <div className="flex-1 hidden lg:flex items-center justify-end gap-4 xl:gap-6 z-20">
             
-            {/* NIEUW: TAAL SELECTIE DROPDOWN DESKTOP */}
-            <div className="relative">
+            {/* Dit is het échte Google script, maar we verbergen het visueel (display: none) */}
+            <div id="google_translate_element" style={{ display: 'none' }}></div>
+
+            {/* JOUW EIGEN MOOIE TAAL DROPDOWN */}
+            <div className="relative notranslate" translate="no">
               <button 
                 onClick={() => setIsLangMenuOpen(!isLangMenuOpen)}
-                className="flex items-center gap-2 px-3 py-2 rounded-xl text-gray-600 hover:text-forest-800 hover:bg-forest-50 transition-colors font-bold text-sm"
+                className="flex items-center gap-2 px-3 py-2 rounded-xl text-gray-600 hover:text-forest-800 hover:bg-forest-50 transition-colors font-bold text-sm cursor-pointer"
               >
                 <Globe size={18} />
                 {huidigeTaal}
@@ -140,7 +148,6 @@ export default function Navbar() {
                 </div>
               )}
             </div>
-            {/* EINDE TAAL SELECTIE */}
 
             <Link
               to="/evenementen"
@@ -166,6 +173,7 @@ export default function Navbar() {
       {/* Mobile menu dropdown */}
       <div className={`lg:hidden border-t border-gray-100 bg-white overflow-hidden transition-all duration-300 ${isOpen ? 'max-h-screen opacity-100' : 'max-h-0 opacity-0'}`}>
         <div className="px-4 py-4 space-y-1 shadow-inner">
+          
           {navLinks.map((link) => (
             <Link
               key={link.href}
@@ -189,13 +197,12 @@ export default function Navbar() {
             </Link>
           )}
 
-          {/* NIEUW: TAAL SELECTIE MOBIEL */}
+          {/* JOUW EIGEN MOOIE TAALKNOPPEN OP MOBIEL */}
           <div className="flex justify-around items-center pt-4 mt-2 border-t border-gray-100">
             <button onClick={() => veranderTaal('nl')} className={`px-4 py-2 rounded-xl text-sm font-bold ${huidigeTaal === 'NL' ? 'bg-forest-50 text-forest-800' : 'text-gray-500'}`}>NL</button>
             <button onClick={() => veranderTaal('en')} className={`px-4 py-2 rounded-xl text-sm font-bold ${huidigeTaal === 'EN' ? 'bg-forest-50 text-forest-800' : 'text-gray-500'}`}>EN</button>
             <button onClick={() => veranderTaal('so')} className={`px-4 py-2 rounded-xl text-sm font-bold ${huidigeTaal === 'SO' ? 'bg-forest-50 text-forest-800' : 'text-gray-500'}`}>SO</button>
           </div>
-          {/* EINDE TAAL MOBIEL */}
 
         </div>
       </div>

@@ -21,3 +21,23 @@
     text-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
   }
 }
+
+/* --- GOOGLE TRANSLATE BANNER VERBERGEN --- */
+iframe.goog-te-banner-frame {
+    display: none !important;
+}
+.goog-te-banner-frame.skiptranslate {
+    display: none !important;
+}
+body {
+    top: 0px !important;
+    position: static !important;
+}
+/* Verberg tooltip hover popups */
+#goog-gt-tt, .goog-te-balloon-frame {
+    display: none !important;
+}
+.goog-text-highlight {
+    background: none !important;
+    box-shadow: none !important;
+}
