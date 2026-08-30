@@ -29,33 +29,31 @@ export default function Navbar() {
   const [huidigeTaal] = useState(getActiveLanguage());
 
   const veranderTaal = (taalcode: string) => {
-    if (taalcode === 'nl') {
-      // De Cookie Killer: Sloop de cookie op ELK mogelijk subdomein
-      const hostParts = window.location.hostname.split('.');
-      while (hostParts.length > 0) {
-        const d = hostParts.join('.');
-        document.cookie = `googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; domain=${d}`;
-        document.cookie = `googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; domain=.${d}`;
-        hostParts.shift();
-      }
-      document.cookie = "googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
-      
-      // Gooi ook eventuele extra browser-opslag leeg
-      window.localStorage.removeItem('googtrans');
-      window.sessionStorage.removeItem('googtrans');
-    } else {
-      // Stel de nieuwe taal in voor de komende 365 dagen
-      const host = window.location.hostname;
+    const host = window.location.hostname;
+    
+    // STAP 1: ALTIJD eerst alle oude cookies agressief verwijderen (De Cookie Killer)
+    const hostParts = host.split('.');
+    while (hostParts.length > 0) {
+      const d = hostParts.join('.');
+      document.cookie = `googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; domain=${d}`;
+      document.cookie = `googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; domain=.${d}`;
+      hostParts.shift();
+    }
+    document.cookie = "googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+    window.localStorage.removeItem('googtrans');
+    window.sessionStorage.removeItem('googtrans');
+
+    // STAP 2: Als de gekozen taal NIET Nederlands is, schrijf dan de nieuwe schone cookie
+    if (taalcode !== 'nl') {
       const expires = new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toUTCString();
       document.cookie = `googtrans=/nl/${taalcode}; expires=${expires}; path=/;`;
       document.cookie = `googtrans=/nl/${taalcode}; expires=${expires}; domain=${host}; path=/;`;
       document.cookie = `googtrans=/nl/${taalcode}; expires=${expires}; domain=.${host}; path=/;`;
     }
     
-    // Herlaad de pagina zodat alles weer klopt
+    // STAP 3: Herlaad de pagina zodat de nieuwe instelling direct werkt
     window.location.reload();
   };
-  // ---------------------------------------------
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 20);
