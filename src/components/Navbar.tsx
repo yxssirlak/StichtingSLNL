@@ -19,11 +19,9 @@ export default function Navbar() {
   const location = useLocation();
   const [session, setSession] = useState<Session | null>(null);
 
-  // --- NIEUW: Bulletproof Google Translate Logica (De /nl/nl Hack) ---
+  // --- NIEUW: Bulletproof Google Translate Logica (De Cookie Killer) ---
   const getActiveLanguage = () => {
     const match = document.cookie.match(/googtrans=\/nl\/([a-z]{2})/);
-    // Als de taal 'nl' is, weten we dat de hack actief is en tonen we gewoon 'NL'
-    if (match && match[1] === 'nl') return 'NL';
     return match ? match[1].toUpperCase() : 'NL';
   };
 
@@ -31,16 +29,30 @@ export default function Navbar() {
   const [huidigeTaal] = useState(getActiveLanguage());
 
   const veranderTaal = (taalcode: string) => {
-    const host = window.location.hostname;
-    const expires = new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toUTCString();
-
-    // We overschrijven de cookie altijd, ongeacht of het nl, en of so is.
-    // Bij 'nl' wordt het /nl/nl. Google snapt dit als "Toon origineel".
-    document.cookie = `googtrans=/nl/${taalcode}; expires=${expires}; path=/;`;
-    document.cookie = `googtrans=/nl/${taalcode}; expires=${expires}; domain=${host}; path=/;`;
-    document.cookie = `googtrans=/nl/${taalcode}; expires=${expires}; domain=.${host}; path=/;`;
+    if (taalcode === 'nl') {
+      // De Cookie Killer: Sloop de cookie op ELK mogelijk subdomein
+      const hostParts = window.location.hostname.split('.');
+      while (hostParts.length > 0) {
+        const d = hostParts.join('.');
+        document.cookie = `googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; domain=${d}`;
+        document.cookie = `googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; domain=.${d}`;
+        hostParts.shift();
+      }
+      document.cookie = "googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+      
+      // Gooi ook eventuele extra browser-opslag leeg
+      window.localStorage.removeItem('googtrans');
+      window.sessionStorage.removeItem('googtrans');
+    } else {
+      // Stel de nieuwe taal in voor de komende 365 dagen
+      const host = window.location.hostname;
+      const expires = new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toUTCString();
+      document.cookie = `googtrans=/nl/${taalcode}; expires=${expires}; path=/;`;
+      document.cookie = `googtrans=/nl/${taalcode}; expires=${expires}; domain=${host}; path=/;`;
+      document.cookie = `googtrans=/nl/${taalcode}; expires=${expires}; domain=.${host}; path=/;`;
+    }
     
-    // Herlaad de pagina
+    // Herlaad de pagina zodat alles weer klopt
     window.location.reload();
   };
   // ---------------------------------------------
