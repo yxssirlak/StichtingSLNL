@@ -85,11 +85,12 @@ export default function Navbar() {
           
           {/* LINKERKANT: Logo */}
           <div className="flex-1 flex justify-start z-20">
-            <Link to="/" className="flex items-center gap-4 group">
-              <img src="/SLNL_logo.png" alt="SLNL Logo" className="w-14 h-14 lg:w-16 lg:h-16 flex-shrink-0 group-hover:scale-105 transition-transform" />
-              <div className="hidden md:block">
-                <div className="font-black text-forest-800 text-base lg:text-lg leading-tight">STICHTING SLNL</div>
-                <div className="text-xs text-gray-600 font-semibold leading-tight">Somaliland Nederland</div>
+            <Link to="/" className="flex items-center gap-2 md:gap-4 group">
+              <img src="/SLNL_logo.png" alt="SLNL Logo" className="w-12 h-12 md:w-14 md:h-14 lg:w-16 lg:h-16 flex-shrink-0 group-hover:scale-105 transition-transform" />
+              {/* De 'hidden' class is hier weggehaald, en de tekst is iets geschaald voor mobiel */}
+              <div>
+                <div className="font-black text-forest-800 text-sm md:text-base lg:text-lg leading-tight">STICHTING SLNL</div>
+                <div className="text-[10px] md:text-xs text-gray-600 font-semibold leading-tight">Somaliland Nederland</div>
               </div>
             </Link>
           </div>
