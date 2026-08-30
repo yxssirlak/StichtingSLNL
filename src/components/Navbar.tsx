@@ -26,7 +26,7 @@ export default function Navbar() {
   };
 
   const [isLangMenuOpen, setIsLangMenuOpen] = useState(false);
-  const [huidigeTaal, setHuidigeTaal] = useState(getActiveLanguage());
+  const [huidigeTaal] = useState(getActiveLanguage());
 
   const veranderTaal = (taalcode: string) => {
     // Maak een verloopdatum voor 1 jaar in de toekomst
