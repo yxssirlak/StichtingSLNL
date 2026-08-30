@@ -29,23 +29,24 @@ export default function Navbar() {
   const [huidigeTaal] = useState(getActiveLanguage());
 
   const veranderTaal = (taalcode: string) => {
-    // Maak een verloopdatum voor 1 jaar in de toekomst
     const date = new Date();
     date.setTime(date.getTime() + (365 * 24 * 60 * 60 * 1000));
     const expires = "expires=" + date.toUTCString();
 
     if (taalcode === 'nl') {
-      // Wis de cookie als we terug naar Nederlands gaan
+      // Wis de cookie agressief op alle mogelijke domein-niveaus (met en zonder punt)
       document.cookie = "googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+      document.cookie = `googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; domain=${window.location.hostname}; path=/;`;
+      document.cookie = `googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; domain=.${window.location.hostname}; path=/;`;
     } else {
-      // Stel de cookie in mét de verloopdatum van 1 jaar
+      // Stel de cookie in mét de verloopdatum
       document.cookie = `googtrans=/nl/${taalcode}; ${expires}; path=/`;
+      document.cookie = `googtrans=/nl/${taalcode}; ${expires}; domain=.${window.location.hostname}; path=/`;
     }
     
     // Herlaad de pagina om de vertaling direct toe te passen
     window.location.reload();
   };
-  // ---------------------------------------------
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 20);

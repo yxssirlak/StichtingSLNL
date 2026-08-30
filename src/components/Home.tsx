@@ -24,12 +24,6 @@ export default function Home() {
             {/* Tekst kant (Linkerzijde) */}
             <div className="order-2 lg:order-1 animate-slide-up">
               
-              <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-white border border-forest-100 rounded-full mb-6 shadow-sm">
-                <span className="w-2 h-2 rounded-full bg-forest-600 animate-pulse" />
-                <span className="text-xs font-bold text-forest-800 uppercase tracking-wider">
-                  Stichting Somaliland Nederland
-                </span>
-              </div>
               
               <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black text-gray-900 leading-[1.1] mb-4">
                 Meer zichtbaar, <br/><span className="text-forest-800">meer samen!</span>
