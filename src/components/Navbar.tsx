@@ -19,7 +19,7 @@ export default function Navbar() {
   const location = useLocation();
   const [session, setSession] = useState<Session | null>(null);
 
-  // --- NIEUW: Bulletproof Google Translate Logica via Cookies ---
+  // --- NIEUW: Bulletproof Google Translate Logica via Cookies (Blijft onthouden!) ---
   const getActiveLanguage = () => {
     const match = document.cookie.match(/googtrans=\/nl\/([a-z]{2})/);
     return match ? match[1].toUpperCase() : 'NL';
@@ -29,14 +29,20 @@ export default function Navbar() {
   const [huidigeTaal, setHuidigeTaal] = useState(getActiveLanguage());
 
   const veranderTaal = (taalcode: string) => {
-    // Simpele, betrouwbare cookie (werkt ook lokaal perfect)
+    // Maak een verloopdatum voor 1 jaar in de toekomst
+    const date = new Date();
+    date.setTime(date.getTime() + (365 * 24 * 60 * 60 * 1000));
+    const expires = "expires=" + date.toUTCString();
+
     if (taalcode === 'nl') {
+      // Wis de cookie als we terug naar Nederlands gaan
       document.cookie = "googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
     } else {
-      document.cookie = `googtrans=/nl/${taalcode}; path=/`;
+      // Stel de cookie in mét de verloopdatum van 1 jaar
+      document.cookie = `googtrans=/nl/${taalcode}; ${expires}; path=/`;
     }
     
-    // Herlaad de pagina zodat het Google script de nieuwe cookie leest
+    // Herlaad de pagina om de vertaling direct toe te passen
     window.location.reload();
   };
   // ---------------------------------------------
@@ -125,10 +131,7 @@ export default function Navbar() {
           {/* RECHTERKANT: Custom Taal Knop & Doe Mee */}
           <div className="flex-1 hidden lg:flex items-center justify-end gap-4 xl:gap-6 z-20">
             
-            {/* Dit is het échte Google script, maar we verbergen het visueel (display: none) */}
-            <div id="google_translate_element" style={{ display: 'none' }}></div>
-
-            {/* JOUW EIGEN MOOIE TAAL DROPDOWN */}
+            {/* JOUW EIGEN MOOIE TAAL DROPDOWN (met notranslate) */}
             <div className="relative notranslate" translate="no">
               <button 
                 onClick={() => setIsLangMenuOpen(!isLangMenuOpen)}
@@ -197,8 +200,8 @@ export default function Navbar() {
             </Link>
           )}
 
-          {/* JOUW EIGEN MOOIE TAALKNOPPEN OP MOBIEL */}
-          <div className="flex justify-around items-center pt-4 mt-2 border-t border-gray-100">
+          {/* JOUW EIGEN MOOIE TAALKNOPPEN OP MOBIEL (met notranslate) */}
+          <div className="notranslate flex justify-around items-center pt-4 mt-2 border-t border-gray-100" translate="no">
             <button onClick={() => veranderTaal('nl')} className={`px-4 py-2 rounded-xl text-sm font-bold ${huidigeTaal === 'NL' ? 'bg-forest-50 text-forest-800' : 'text-gray-500'}`}>NL</button>
             <button onClick={() => veranderTaal('en')} className={`px-4 py-2 rounded-xl text-sm font-bold ${huidigeTaal === 'EN' ? 'bg-forest-50 text-forest-800' : 'text-gray-500'}`}>EN</button>
             <button onClick={() => veranderTaal('so')} className={`px-4 py-2 rounded-xl text-sm font-bold ${huidigeTaal === 'SO' ? 'bg-forest-50 text-forest-800' : 'text-gray-500'}`}>SO</button>

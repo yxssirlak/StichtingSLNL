@@ -22,22 +22,25 @@
   }
 }
 
-/* --- GOOGLE TRANSLATE BANNER VERBERGEN --- */
-iframe.goog-te-banner-frame {
+/* --- GOOGLE TRANSLATE BANNER VOLLEDIG VERBERGEN --- */
+.VIpgJd-ZVi9od-ORHb-OEVmcd,
+.VIpgJd-ZVi9od-aZ2wEe-wOHMyf,
+.goog-te-banner-frame,
+.goog-te-banner-frame.skiptranslate,
+#goog-gt-tt {
     display: none !important;
+    visibility: hidden !important;
 }
-.goog-te-banner-frame.skiptranslate {
-    display: none !important;
-}
+
+/* VOORKOM DAT GOOGLE DE PAGINA NAAR BENEDEN SCHUIFT */
 body {
-    top: 0px !important;
+    top: 0 !important;
     position: static !important;
+    margin-top: 0 !important;
 }
-/* Verberg tooltip hover popups */
-#goog-gt-tt, .goog-te-balloon-frame {
-    display: none !important;
-}
+
+/* VERBERG GELE HOVER EFFECTEN */
 .goog-text-highlight {
-    background: none !important;
+    background-color: transparent !important;
     box-shadow: none !important;
 }
