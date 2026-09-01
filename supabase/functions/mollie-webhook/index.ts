@@ -9,7 +9,7 @@ const supabase = createClient(
 );
 const resendApiKey = Deno.env.get('RESEND_API_KEY')!;
 
-serve(async (req) => {
+serve(async (req: Request) => {
   try {
     const bodyText = await req.text();
     const params = new URLSearchParams(bodyText);
@@ -40,7 +40,7 @@ serve(async (req) => {
       if (updateError) return new Response("Database Error", { status: 500 });
 
       const hoofdkoper = inschrijvingen[0];
-      const totaalBedrag = inschrijvingen.reduce((total, t) => total + Number(t.payment_amount), 0);
+      const totaalBedrag = inschrijvingen.reduce((total: number, t: any) => total + Number(t.payment_amount), 0);
 
       // Maak een HTML blokje voor ELK los ticket
       let ticketsHtml = '';
@@ -95,7 +95,7 @@ serve(async (req) => {
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({
-          from: 'Stichting SLNL <info@somalilandnederland.nl>',
+          from: 'Stichting SLNL <order@tickets.somalilandnederland.nl>',
           to: hoofdkoper.email,
           subject: `🎟️ Jouw ${inschrijvingen.length} tickets voor ${hoofdkoper.evenement_titel}`,
           html: emailHtml
