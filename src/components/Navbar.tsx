@@ -155,7 +155,6 @@ export default function Navbar() {
                   <div className="flex flex-col py-1">
                     <button onClick={() => veranderTaal('nl')} className={`px-4 py-2 text-left text-sm font-bold hover:bg-forest-50 transition-colors ${huidigeTaal === 'NL' ? 'text-forest-800' : 'text-gray-600'}`}>Nederlands</button>
                     <button onClick={() => veranderTaal('en')} className={`px-4 py-2 text-left text-sm font-bold hover:bg-forest-50 transition-colors ${huidigeTaal === 'EN' ? 'text-forest-800' : 'text-gray-600'}`}>English</button>
-                    <button onClick={() => veranderTaal('so')} className={`px-4 py-2 text-left text-sm font-bold hover:bg-forest-50 transition-colors ${huidigeTaal === 'SO' ? 'text-forest-800' : 'text-gray-600'}`}>Soomaali</button>
                   </div>
                 </div>
               )}
@@ -213,7 +212,6 @@ export default function Navbar() {
           <div className="notranslate flex justify-around items-center pt-4 mt-2 border-t border-gray-100" translate="no">
             <button onClick={() => veranderTaal('nl')} className={`px-4 py-2 rounded-xl text-sm font-bold ${huidigeTaal === 'NL' ? 'bg-forest-50 text-forest-800' : 'text-gray-500'}`}>NL</button>
             <button onClick={() => veranderTaal('en')} className={`px-4 py-2 rounded-xl text-sm font-bold ${huidigeTaal === 'EN' ? 'bg-forest-50 text-forest-800' : 'text-gray-500'}`}>EN</button>
-            <button onClick={() => veranderTaal('so')} className={`px-4 py-2 rounded-xl text-sm font-bold ${huidigeTaal === 'SO' ? 'bg-forest-50 text-forest-800' : 'text-gray-500'}`}>SO</button>
           </div>
 
         </div>
